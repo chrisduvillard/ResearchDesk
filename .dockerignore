@@ -11,3 +11,6 @@ tmp
 # Temporary backup restoration candidates
 restore-inbox/
 data-before-restore*/
+
+# Local implementation/rehearsal artifacts and private test data
+.superpowers/

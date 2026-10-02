@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Research Desk</title>
+    <link rel="stylesheet" href="/static/research.css" />
+    <script src="/static/research.js" defer></script>
+  </head>
+  <body>
+    <a class="skip" href="#content">Skip to research</a>
+    <header>
+      <a class="brand" href="/"
+        >Research <strong>Desk</strong><small>Evidence first.</small></a
+      >
+      <form id="search" role="search">
+        <label class="sr" for="query">Search securities and markets</label
+        ><input
+          id="query"
+          name="q"
+          type="search"
+          placeholder="Search a stock or market"
+          maxlength="100"
+        /><button>Search</button>
+      </form>
+      <button id="owner-button">Owner login</button>
+    </header>
+    <nav aria-label="Research views">
+      <a href="/?view=today">Today</a
+      ><a href="/research?view=contributors">Contributors</a
+      ><a href="/research?view=calls">Calls</a
+      ><a href="/research?view=funds">Funds</a
+      ><a href="/research?view=analytics">Follow / fade</a
+      ><a href="/research?view=sources">Sources & alerts</a
+      ><a href="/dan">Dan’s original desk ↗</a><a href="/dbmf">DBMF detail ↗</a>
+    </nav>
+    <main id="content" tabindex="-1">
+      <p role="status">Loading research…</p>
+    </main>
+    <footer>
+      Private research · Hypothetical models, not actual returns · Source
+      evidence stays attached to every observation.
+    </footer>
+    <dialog id="owner-dialog">
+      <form id="login-form">
+        <h2>Owner access</h2>
+        <p id="owner-help">
+          Reading is open to your private network. Editing needs the owner
+          password.
+        </p>
+        <label
+          >Password<input
+            id="password"
+            type="password"
+            autocomplete="current-password"
+            minlength="15"
+            maxlength="1024"
+            required
+        /></label>
+        <div class="actions">
+          <button type="submit">Log in</button
+          ><button type="button" id="close-login">Cancel</button>
+        </div>
+        <p id="login-error" role="alert"></p>
+      </form>
+    </dialog>
+    <div id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

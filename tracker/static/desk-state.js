@@ -35,7 +35,7 @@
   function viewURL(scope, raw) {
     const params = new URLSearchParams();
     for (const [key, value] of Object.entries(normalize(scope, raw))) if (value !== "") params.set(key, value);
-    return (scope === "dbmf" ? "/dbmf" : "/") + "?" + params;
+    return (scope === "dbmf" ? "/dbmf" : "/dan") + "?" + params;
   }
   function transitions(previous, issues) {
     const active = Object.fromEntries(issues.filter(i => i.notify || previous[i.key]).map(i => [i.key, {title: i.title, link: i.link}]));

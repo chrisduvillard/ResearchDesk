@@ -70,7 +70,10 @@ def check_database(directory):
         digests = {}
         for table, hash_column in [('snapshots', 'content_hash'),
                                    ('dbmf_reports', 'raw_hash'),
-                                   ('dbmf_observations', 'raw_hash')]:
+                                   ('dbmf_observations', 'raw_hash'),
+                                   ('disclosures', 'content_hash'),
+                                   ('fund_reports', 'content_hash'),
+                                   ('fund_observations', 'content_hash')]:
             if table not in tables:  # Older DBMF backups predate observations.
                 continue
             counts[table] = 0

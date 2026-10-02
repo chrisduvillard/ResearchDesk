@@ -2,7 +2,90 @@
 
 [← Installation and overview](../README.md) · [Technical reference](reference.md)
 
-## Daily workflow
+## Expanded daily workflow
+
+Open **Today** for the deterministic 07:00 Europe/Zurich briefing. The live column covers subsequent activity. Each item shows its source, public date, usable date, and evidence link. Corrections remain corrections. A missed morning cutoff is generated when the analytics worker resumes.
+
+Use **Contributors** to inspect separately scoped disclosures for each person. Use **Calls** for owner-reviewed recommendations. Global search opens a security or futures-market page with prices, contributor evidence, fund holdings, and a dated activity list. Search uses source identities; matching ticker text alone never merges different securities. Owners can link verified identities with a source URL and recorded reason on the asset page.
+
+**Funds** compares signed notional/NAV, equity weights, collateral, issuer risk weights, and volatility contribution in separate views. Select latest-available or an exact shared reporting date. Missing cells stay missing. A complete report can establish zero for an exited holding; an incomplete download cannot. Open a fund to inspect quantities, expiry, original rows, changes, and equity concentration. Contract rolls are identified separately. Sector allocation remains unavailable until dated, verified classifications exist. Holdings weight changes are never labeled as trade notifications.
+
+The original **Dan’s desk** (`/dan`) and **DBMF detail** (`/dbmf`) remain available. Old root query/hash bookmarks redirect to Dan’s desk. Their legacy methods and detailed controls are documented below.
+
+## Owner setup
+
+Reading the private dashboard does not require an account. Editing calls, interpretations, source settings, benchmarks, alert rules, and model definitions requires the single owner password. There is no public registration.
+
+From the installation folder, run this interactive command once:
+
+```bash
+docker compose exec web python -m tracker.cli owner-setup
+```
+
+Enter a password of at least 15 characters twice. It is not echoed or supplied as a command-line argument. Use **Owner login** in the dashboard. To replace a lost password, run `docker compose exec web python -m tracker.cli owner-reset`; this invalidates existing sessions. Logout also revokes the current session. Passwords use Argon2id; sessions expire after 12 hours. Five recent failed login attempts trigger throttling.
+
+For local HTTP, the example `.env` sets `APP_SECURE_COOKIES=0`. For private HTTPS through a reverse proxy, set `APP_SECURE_COOKIES=1` and `APP_ORIGIN` to the exact HTTPS origin, with no trailing slash. Restart the services after changing these settings. Keep the host bind on loopback and use your existing private network. Do not expose the app publicly.
+
+### Record and approve a call
+
+1. Open **Calls → Record a call**, choose the contributor, and search for the instrument.
+2. Supply direction/action, instrument type, spoken timestamp with UTC offset, matching IANA timezone, original source URL, a short excerpt, and stated horizon. Add conditions or a target only if actually stated.
+3. Save the draft, inspect the displayed evidence, then choose **Approve this revision**.
+4. Use **Edit** to create another draft revision, or **Retract** with a reason. Revision history remains available.
+
+The usable timestamp is the later of the public timestamp and approval. Historical entry cannot backdate a live signal. Conditional, ambiguous, unverified, and actual option-contract recommendations remain visible but are excluded from automated portfolio entries. A contributor direction review records an interpretation correction; it does not fabricate a trade or retrospectively eligible signal.
+
+## Expanded source coverage
+
+| Source | Current integration | Qualification requirement |
+| --- | --- | --- |
+| Dan Nathan | Existing automatic disclosures and preserved history | Original archives retained |
+| Karen Finerman, Guy Adami | Automatic dated official CNBC sections | Failures retain last accepted state |
+| Josh Brown, Steve Weiss, Tim Seymour | Reviewed call entry; automatic disclosure coverage unavailable | A supported, dated official section must be qualified |
+| DBMF | Original collector plus shared fund model | Existing detailed view retained; shared alerts require the scheduled gate |
+| KMLM | Official page plus holdings CSV | Observation until five successful scheduled slots across two reporting dates |
+| CTA | Official holdings workbook and separate issuer risk profile | Same scheduled gate |
+| ARKK, ARKQ, ARKW, ARKG, ARKF, ARKX | Official public website endpoint and holdings CSV | Same scheduled gate for each fund |
+| WTMF | Unavailable: official requests from the host returned HTTP 403 | Accessible unattended official source and qualification still required |
+
+Live checks on October 2–3, 2026 found KMLM, CTA, and all six ARK holdings downloads accessible. This is evidence of access, not completion of the scheduled qualification gate. Source access can change; **Sources & alerts** shows current runs. No manual holdings import substitutes for blocked new fund automation. ARK trade notifications are not inferred from holdings; their integration and verified sector history remain unavailable.
+
+Contributor schedules remain 22:15 America/New_York; fund schedules are 10:00 and 22:30 in that timezone. The operating system timezone does not change these schedules. New funds begin in observation mode; alerts stay suppressed until qualification. A source failure has bounded retries and does not stop the other sources.
+
+## Scorecard methodology
+
+**Follow / fade** separates contributor, evidence stream, asset class, and 1/5/20/60-session horizons. The headline default is 20 sessions. Entry is the first regular-session open after the information becomes usable. Disclosures use first accepted acquisition time; calls use the later public/approval timestamp. Initial baselines, interpretation corrections, unverified mappings, ambiguous directions, and overlapping same-direction observations do not inflate the headline sample. Inspect the saved signal rows for exclusions and missing prices.
+
+The adjusted-price scorecard shows gross and modeled net returns, mean, median, win rate, count, missing data, follow/fade/always-long comparisons, and benchmark coverage. SPY is the initial benchmark for verified US equity listings. Other comparisons need an owner-configured benchmark. A price or benchmark gap remains explicit; unrelated classes are not ranked together.
+
+Defaults are 5 basis points on each side, 5% annual short borrow using actual calendar days/365, and zero idle-cash return. These are editable scenarios. Descriptive 95% block-bootstrap intervals use a recorded deterministic seed and session blocks at least as long as the horizon, keeping same-day observations together. Intervals and rankings are suppressed below 30 eligible signals or three complete horizon blocks. Saved inputs include evidence and immutable price vintages, so later data corrections do not rewrite saved results.
+
+## Hypothetical portfolio rules
+
+Each definition models one contributor and one evidence type, with paired follow/fade runs. ETF holdings never generate simulated positions. Starting capital is $100,000; a new entry targets 10% of current equity, with at most ten positions and 100% gross exposure at entry. Fractional shares are allowed. Short proceeds and their initial capital requirement remain restricted. There is no pyramiding or daily rebalance.
+
+Fixed-horizon models exit at the close of session 1, 5, 20, or 60 and ignore intervening signals for that instrument. Signal-driven models exit at the next usable open after an opposing signal, explicit close, or valid complete disclosure removal, with a 60-session maximum. A removal is an observed absence, not a verified sale. Reversals close first, then evaluate a new entry. Same-direction updates do not reset the holding clock.
+
+Events use chronological availability and stable ID tie ordering. A skipped entry records its reason. Missing prices on an open position stop complete valuation; no stale substitute or invented delisting exit is used. Nonpositive equity stops the model. Split-adjusted quantities and explicit dividend cash flows, including short dividend debits, are accounted separately from scorecard adjusted prices. Options are not simulated from underlying moves.
+
+Inspect equity, drawdown, exposure, turnover, trading costs, borrowing, trades, skips, and comparable gross buy-and-hold. Coverage matters even when idle capital has a zero return. **Exploratory historical** runs are labeled separately from **Prospective** definitions starting now. To change rules, enter the previous definition ID and save a new version; old definitions and runs remain unchanged. Later call corrections cannot erase an entry that was usable when a prospective model entered it.
+
+Free price data, uncertain historical coverage, and unknown borrow availability limit realism. These results measure specified research rules, not actual contributor performance or achievable execution.
+
+## Expanded alerts and troubleshooting
+
+**Sources & alerts** supports global defaults and more specific source/watched-asset rules. Default alerts cover contributor additions/removals/direction changes, approved calls, futures moves of at least 5 percentage points, equity weight moves of at least 1 point, and direction flips where both sides exceed 1% in magnitude. Exhausted retries, overdue collection, and recovery also appear.
+
+Notification permission belongs to each browser. Enabling starts at the current activity cursor, without replaying the archive. Web Locks and a transactional browser cursor coordinate tabs. Restoring a backup resets the cursor epoch; sessions are invalidated. Notifications work only with an open dashboard tab and browser support; the briefing remains readable without permission.
+
+- A blank fund cell means missing data; inspect qualification and reporting dates before comparing.
+- A queued simulation needs the **analytics** service; inspect `docker compose logs --tail=100 analytics`.
+- A login that does not persist on local HTTP usually means secure cookies are enabled; use HTTPS or the explicit local-only setting above.
+- A call that cannot be approved may have changed revision in another tab; reload and check the current draft.
+- An unavailable source is not repaired by clearing history. Retain archives and inspect the source error.
+
+## Legacy desk daily workflow
+
 
 ### 1. Start with “What changed?”
 

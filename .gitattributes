@@ -1,0 +1,2 @@
+# Preserve official download bytes, including issuer CRLF and final blank rows.
+tests/fixtures/funds/*.csv -text whitespace=cr-at-eol,-blank-at-eof

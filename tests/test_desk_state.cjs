@@ -41,3 +41,7 @@ test('Independent incidents and browser reloads keep their own notification life
   assert.deepEqual(next.opened.map(x=>x.key),['dan:prices']);
   assert.deepEqual(desk.transitions(next.active,[prices]).resolved.map(x=>x.key),['dbmf:review']);
 });
+
+test('Dan bookmarks stay on contributor route after Today becomes the landing page', () => {
+  assert.ok(desk.viewURL('dan', {page: 'history'}).startsWith('/dan?'));
+});

@@ -30,6 +30,10 @@ from .dbmf.api import router as dbmf_router
 app.include_router(dbmf_router)
 from .desk import router as desk_router
 app.include_router(desk_router)
+from .auth import router as auth_router
+from .v2 import router as v2_router
+app.include_router(auth_router)
+app.include_router(v2_router)
 app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
 
 
@@ -42,7 +46,7 @@ async def response_headers(request, call_next):
     response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
     if request.url.path.startswith("/api/"):
         response.headers["Cache-Control"] = "no-store"
-    elif request.url.path in ("/", "/dbmf", "/docs") or request.url.path.startswith('/static/'):
+    elif request.url.path in ("/", "/dan", "/research", "/dbmf", "/docs") or request.url.path.startswith('/static/'):
         # Revalidate the application shell/assets across deployments. Versioned
         # links alone cannot invalidate a previously cached HTML entry point.
         response.headers["Cache-Control"] = "no-cache"
@@ -51,7 +55,17 @@ async def response_headers(request, call_next):
 
 @app.get("/")
 def homepage():
-    return FileResponse(ROOT / "static" / "index.html")
+    return FileResponse(ROOT / "static" / "research.html")
+
+
+@app.get('/research')
+def research_homepage():
+    return FileResponse(ROOT / 'static' / 'research.html')
+
+
+@app.get('/dan')
+def dan_homepage():
+    return FileResponse(ROOT / 'static' / 'index.html')
 
 
 @app.get("/dbmf")

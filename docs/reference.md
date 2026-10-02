@@ -4,7 +4,51 @@
 
 This reference covers source interpretation, price rules, historical data, and operator workflows. The [user guide](guide.md#daily-workflow) explains change summaries, saved views, shared health, browser alerts and source revision comparisons.
 
-A self-hosted record of Dan Nathan's CNBC disclosures, with daily charts, a prospective directional scorecard, and a TradingView Pine indicator. All services and data live on the machine where you install the app.
+A self-hosted contributor and ETF research dashboard with immutable analytical inputs, reviewed calls, and retained Dan Nathan/DBMF detail views. All services and data live on the machine where you install the app.
+
+## Expansion architecture and interfaces
+
+Schema versions 5 and 6 add scoped contributors, sources, disclosures, research events, fund reports/holdings/observations, identity mappings, revisions, owner/session/audit records, immutable price batches and analysis inputs, model definitions, activity, briefings, and alert rules. The existing tables, IDs, and archive paths remain authoritative for legacy APIs and exports. Bridges reference those records; missing historical availability is not fabricated. Measurement units, source dates, acquisition times, processing times, and parser versions remain distinct.
+
+Four long-running services are **web**, **collector** (all supported contributors), **dbmf-collector** (all supported funds), and **analytics**. The one-shot **migrate** service must finish before any of them starts. Runtime `REQUIRE_MIGRATION=1` refuses an older database; only the migration command may advance it. Numbered migrations use SQLite `BEGIN IMMEDIATE` and roll back atomically. Provider collection uses independent source locks and a bounded three-attempt schedule with 5/30-minute backoffs. Slow price acquisition and queued models run outside web requests.
+
+The expanded API lives under `/api/v2`; interactive schema documentation remains at `/docs`. Families include contributors/positions/events/reviews; calls/revisions/approve/retract; funds/reports/exposures/comparisons; assets/timeline/mapping/benchmark; scorecards/simulations/simulation-runs; activity/briefings/alert-rules/sources; and auth. Legacy unversioned APIs retain Dan/DBMF contracts. Activity cursors are opaque and contain a database epoch; a restore resets them. Calls, contributor events, and fund-report histories use scoped opaque `cursor` parameters and `X-Next-Cursor` response headers, with `X-Cursor-Reset` after restoration. Other lists are bounded; archived evidence remains in SQLite and backups.
+
+Mutations use server-side owner sessions and `X-CSRF-Token`, obtained from `/api/v2/auth`. Cookies are HttpOnly, SameSite Strict, and HTTPS-secure by default. Exact-origin checks, login throttling, Argon2id (64 MiB, three iterations, parallelism one), credential-reset/session race protection, and audit records protect writes. Source excerpts render as text; archived HTML is served as plain text. Source links permit HTTP(S) without embedded credentials. No secrets or machine-specific public defaults belong in this repository.
+
+CLI additions: `migrate`, `owner-setup`, `owner-reset`, `source-collect SOURCE_ID`, `contributor-worker`, `fund-worker`, `analytics-worker`, `analytics-once`, and corresponding worker health commands. Original collection and export commands remain available. A manual source check does not count toward scheduled qualification.
+
+## Expansion migration and rollback
+
+Do not use an ordinary rolling update for this schema-changing release. Keep the previous image and matching database/archive backup together.
+
+1. While the previous installation is running, record its image ID and create a backup. Then quiesce all writers with `docker compose stop`. Preserve the complete data directory and `.env` in an off-device copy.
+2. Validate the backup using `scripts/check-backup.py`. It checks SQLite integrity, foreign keys, and archived source hashes. Rehearse restoration and the new `python -m tracker.cli migrate` against a separate data directory before touching the live directory. Never point a rehearsal at the live bind mount.
+3. Build the new image. The migration command creates a unique protected archive under `pre-migration/` before advancing an existing schema. Daily backup rotation does not overwrite that archive. Confirm `Schema 6 ready`, then start the four services with the completed migration dependency.
+4. Set up/reset the owner locally. Check existing positions, histories, reviews, source downloads, exports, and new pages. Keep new funds in observation mode until their real scheduled gates pass. Check the private HTTPS dashboard from the laptop; do not enable public hosting.
+5. For rollback, stop all new services, restore the matching pre-migration database **and archives** into an empty directory, and use the preserved old image and compose configuration. Never start an old binary against the migrated database.
+
+Backups include original snapshots/exports/DBMF archives, new source/fund archives, schema versions, owner configuration, immutable analytics inputs, price vintages, and audit history. Session rows are removed from the backed-up database and the activity epoch is rotated. The backup destination is checkpointed into a single SQLite file; authentication changes must not remain in an unarchived WAL. Treat backups as private because they contain owner hashes and research data.
+
+The production-backup rehearsal on the development host preserved 6 legacy snapshots, 20 DBMF reports, and 25 DBMF observations byte-for-byte across migration and repeated initialization. The shared model intentionally represents canonical report observations separately; original acquisition observations are retained in legacy evidence. This rehearsal does not replace the quiesced release backup or laptop check.
+
+## Expansion verification
+
+Run the complete Python and JavaScript suites before release. Live provider qualification is separate from deterministic fixture tests. Optional browser tests use a disposable database/server and require a test-only Playwright installation:
+
+```bash
+python -m pytest -q
+npm ci
+npm test
+# With Playwright and Chromium installed:
+RESEARCH_BROWSER=1 python -m pytest -q tests/test_expansion_browser.py
+```
+
+Set `BROWSER_EXECUTABLE` if using an existing Chromium executable. Browser journeys cover call approval, hostile source text, navigation/bookmarks, mobile width, notification cursor restoration, and cross-tab deduplication. `scripts/benchmark-expansion.py` creates a disposable five-year dataset with fifty contributor profiles and ten funds, and times representative read endpoints. Heavy analytics are queued separately.
+
+The October 3, 2026 implementation checkpoint passed 362 Python tests locally and in a network-disabled Linux container, four opt-in browser journeys, and fourteen JavaScript tests. A separate Compose rehearsal completed migration and brought all four services healthy. The synthetic dataset held 65,200 research events and 260,800 holdings; the slowest measured read was 0.111 seconds. The production service was not upgraded during these checks.
+
+Linux Docker build/runtime checks are executable on the host. Native macOS, Windows Docker Desktop setup, laptop access, and multi-day source qualification are external release checks and must be recorded independently; a Linux CI pass does not certify them. WTMF automation remains blocked. No full-program completion claim is appropriate until all promised sources qualify and the rollout checks pass.
 
 ## Open the dashboard
 
@@ -16,7 +60,7 @@ ssh -N -L 8765:127.0.0.1:8765 user@your-server
 
 Keep the tunnel open and visit **http://localhost:8765**. Closing the tunnel only closes browser access; the server continues collecting data. The site is bound to localhost on its host. Adjust the destination port if you set a different `APP_PORT` in `.env`.
 
-Use the **Dan Nathan / DBMF** switch at the top. DBMF is also available directly at **http://localhost:8765/dbmf**.
+Use the main research navigation or the **Dan Nathan / DBMF** switch inside the original views. DBMF is also available directly at **http://localhost:8765/dbmf**.
 
 ## DBMF exposure dashboard
 
@@ -235,6 +279,8 @@ Back up the data and preserve your local `.env` before upgrading. Run `git pull 
 
 ### Updating
 
+For the expansion release, follow [Expansion migration and rollback](#expansion-migration-and-rollback) first. The ordinary maintenance procedure below applies only after confirming schema compatibility.
+
 For an installation downloaded as a ZIP:
 
 1. In your existing project folder, run `docker compose exec -T collector python -m tracker.cli backup`. Copy the resulting archive from `data/backups/` to another location.
@@ -320,7 +366,7 @@ To validate a backup without changing your running data:
 3. Run the command below. PowerShell, macOS Terminal, and Linux shells all accept it:
 
 ```text
-docker run --rm --network none --user 0:0 -v "$PWD/restore-inbox:/restore-inbox:ro" dan-nathan-tracker:1.5.1 python scripts/check-backup.py /restore-inbox/recovery.tar.gz
+docker run --rm --network none --user 0:0 -v "$PWD/restore-inbox:/restore-inbox:ro" research-desk:2.0.0-dev python scripts/check-backup.py /restore-inbox/recovery.tar.gz
 ```
 
 Continue only when it prints **Backup verified**. This disposable container has no network access and only mounts the backup folder read-only. The checker uses an isolated temporary directory to validate SQLite, foreign keys, and every referenced source file’s hash. It rejects unsafe paths and does not change the live database. No SQLite or Python installation is required on your computer.

@@ -1,2 +1,2 @@
-"""Private research dashboards for Dan Nathan disclosures and DBMF exposures."""
-__version__ = "1.5.1"
+"""Private contributor, fund and hypothetical-portfolio research dashboards."""
+__version__ = "2.0.0-dev"

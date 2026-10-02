@@ -1,7 +1,7 @@
 name: dan-nathan
 x-common: &common
   build: .
-  image: dan-nathan-tracker:1.5.1
+  image: research-desk:2.0.0-dev
   restart: unless-stopped
   user: "${APP_UID:-1000}:${APP_GID:-1000}"
   init: true
@@ -9,6 +9,9 @@ x-common: &common
     DATA_DIR: /data
     TZ: ${APP_TIMEZONE:-UTC}
     XDG_CACHE_HOME: /data/cache
+    REQUIRE_MIGRATION: "1"
+    APP_SECURE_COOKIES: ${APP_SECURE_COOKIES:-1}
+    APP_ORIGIN: ${APP_ORIGIN:-}
   volumes:
     - type: bind
       source: ${HOST_DATA_DIR:-./data}
@@ -28,8 +31,15 @@ x-common: &common
       max-size: "10m"
       max-file: "3"
 services:
+  migrate:
+    <<: *common
+    restart: "no"
+    command: ["python", "-m", "tracker.cli", "migrate"]
   web:
     <<: *common
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
     ports:
       - "127.0.0.1:${APP_PORT:-8765}:8000"
     healthcheck:
@@ -46,18 +56,36 @@ services:
       retries: 3
   collector:
     <<: *common
-    command: ["python", "-m", "tracker.cli", "worker"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    command: ["python", "-m", "tracker.cli", "contributor-worker"]
     healthcheck:
-      test: ["CMD", "python", "-m", "tracker.cli", "worker-health"]
+      test: ["CMD", "python", "-m", "tracker.cli", "contributor-health"]
       interval: 60s
       timeout: 15s
       start_period: 300s
       retries: 3
   dbmf-collector:
     <<: *common
-    command: ["python", "-m", "tracker.cli", "dbmf-worker"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    command: ["python", "-m", "tracker.cli", "fund-worker"]
     healthcheck:
-      test: ["CMD", "python", "-m", "tracker.cli", "dbmf-health"]
+      test: ["CMD", "python", "-m", "tracker.cli", "fund-health"]
+      interval: 60s
+      timeout: 15s
+      start_period: 300s
+      retries: 3
+  analytics:
+    <<: *common
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    command: ["python", "-m", "tracker.cli", "analytics-worker"]
+    healthcheck:
+      test: ["CMD", "python", "-m", "tracker.cli", "analytics-health"]
       interval: 60s
       timeout: 15s
       start_period: 300s

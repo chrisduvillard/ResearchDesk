@@ -27,7 +27,7 @@ def text_of(node):
     return ""
 
 
-def extract(html):
+def extract(html, subject=r"Dan(?: Nathan)?|He", ancillary=None):
     marker = "window.__s_data="
     if marker not in html:
         raise ParseError("CNBC embedded page data is missing; preserving the last valid disclosure")
@@ -37,7 +37,7 @@ def extract(html):
         raise ParseError("CNBC page data is incomplete") from exc
     found = []
     header_pattern = re.compile(r"Disclosures? as of", re.I)
-    paragraph_lead = re.compile(r"(?:Dan(?: Nathan)?|He)\s+(?:is|has|holds|owns|does)\b", re.I)
+    paragraph_lead = re.compile(rf"(?:{subject})\s+(?:is|has|holds|owns|does)\b", re.I)
 
     def visit(obj):
         if isinstance(obj, dict):
@@ -48,7 +48,7 @@ def extract(html):
             # page paragraphs loses this boundary and can silently drop a new
             # paragraph when CNBC changes its wording.
             for index, node in enumerate(obj):
-                if not isinstance(node, dict) or node.get("tagName", "").lower() != "p":
+                if not isinstance(node, dict) or (node.get("tagName") or "").lower() != "p":
                     continue
                 header = unescape(text_of(node)).strip()
                 if not header_pattern.search(header):
@@ -60,7 +60,7 @@ def extract(html):
                         continue
                     if header_pattern.search(paragraph):
                         break
-                    if not paragraph_lead.match(paragraph):
+                    if not paragraph_lead.match(paragraph) and not (ancillary and ancillary.fullmatch(paragraph)):
                         raise ParseError("Unrecognized disclosure paragraph; preserving the last valid positions")
                     block.append(paragraph)
                 if block:
@@ -126,18 +126,20 @@ def signature(side, symbol, strategy):
     return hashlib.sha256(f"{side}|{symbol}|{' '.join(strategy.lower().split())}".encode()).hexdigest()[:24]
 
 
-def parse_positions(disclosure):
+def parse_positions(disclosure, subject=r"Dan(?: Nathan)?|He"):
     clean = re.sub(r"\s+", " ", disclosure).strip()
-    if re.fullmatch(r"(?:Dan(?: Nathan)?|He) (?:has no positions|holds no positions|does not hold any positions|is not long or short any securities)\.?", clean, re.I):
+    if re.fullmatch(rf"(?:{subject}) (?:has no positions|holds no positions|does not hold any positions|is not long or short any securities)\.?", clean, re.I):
         return []
     positions = []
-    for sentence in re.split(r"(?<=[.])\s+(?=(?:Dan(?: Nathan)?|He)\b)", clean):
-        lead = re.match(r"^(?:Dan(?: Nathan)?|He)\s+is\s+(long|short)\s+(.*)$", sentence, re.I)
+    for sentence in re.split(rf"(?<=[.])\s+(?=(?:{subject})\b)", clean):
+        lead = re.match(rf"^(?:{subject})\s+is\s+(long|short)\s+(.*)$", sentence, re.I)
         if not lead:
             raise ParseError("Unrecognized disclosure sentence; automatic changes paused")
         inherited_side = lead.group(1).lower()
         rest = lead.group(2).strip().rstrip(".")
-        pieces = split_clauses(rest)
+        option_list = re.match(r"^(calls?|puts?) in (.+)$", rest, re.I)
+        inherited_strategy = option_list.group(1).lower() if option_list else None
+        pieces = split_clauses(option_list.group(2) if option_list else rest)
         for piece in pieces:
             original = piece.strip()
             if not original:
@@ -151,7 +153,7 @@ def parse_positions(disclosure):
             match = re.fullmatch(r"([A-Z][A-Z0-9.\-]{0,9})(?:\s+(.+))?", item)
             if not match:
                 raise ParseError(f"Unparsed position clause: {original}")
-            symbol, strategy = match.group(1), match.group(2) or "shares"
+            symbol, strategy = match.group(1), match.group(2) or inherited_strategy or "shares"
             strategy = " ".join(strategy.split())
             if re.fullmatch(r"(?:stock|shares)(?:\s+position)?", strategy, re.I):
                 strategy = "shares"

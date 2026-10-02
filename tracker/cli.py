@@ -39,7 +39,57 @@ def main():
     command.add_argument("--source", required=True, help="Source URL or reference supporting the supplied details")
     command.add_argument("--reason", required=True)
     command.add_argument("--signature", help="Required if the instrument has multiple current strategies")
+    for name in ('migrate','owner-setup','owner-reset','contributor-worker','fund-worker','analytics-worker','analytics-once','analytics-health','contributor-health','fund-health'):
+        sub.add_parser(name)
+    command=sub.add_parser('source-collect')
+    command.add_argument('source_id')
     args = parser.parse_args()
+    if args.command in ('contributor-worker','fund-worker'):
+        from .sources import worker as source_worker
+        source_worker(args.command.removesuffix('-worker'))
+        return
+    if args.command == 'analytics-worker':
+        from .analysis_worker import worker as analytics_worker
+        analytics_worker()
+        return
+    if args.command == 'source-collect':
+        from .sources import collect_source
+        result=collect_source(args.source_id)
+        print(json.dumps(result,indent=2))
+        sys.exit(0 if result['status']=='success' else 1)
+    if args.command in ('analytics-health','contributor-health','fund-health'):
+        with db.database() as conn:
+            last=db.setting(conn,args.command.removesuffix('-health')+'_worker_heartbeat')
+            sys.exit(0 if last and db.utcnow()-datetime.fromisoformat(last)<timedelta(minutes=10) else 1)
+    if args.command in ('migrate','owner-setup','owner-reset','analytics-once'):
+        with db.database() as conn:
+            if args.command=='migrate':
+                version=conn.execute('PRAGMA user_version').fetchone()[0]
+                if version and version < db.SCHEMA_VERSION:
+                    from .collector import migration_backup
+                    target=migration_backup(conn)
+                    print('Pre-migration backup:',target)
+                db.initialize(conn,allow_migration=True)
+                from .research import sync_legacy
+                from .funds import sync_dbmf
+                from .sources import prepare_sources
+                sync_legacy(conn);sync_dbmf(conn);prepare_sources(conn)
+                print('Schema',db.SCHEMA_VERSION,'ready')
+            else:
+                db.initialize(conn)
+                if args.command.startswith('owner-'):
+                    from getpass import getpass
+                    from .auth import setup_owner
+                    password=getpass('Owner password (15+ characters): ')
+                    if password!=getpass('Repeat password: '):
+                        raise SystemExit('Passwords did not match')
+                    setup_owner(conn,password)
+                    print('Owner credential saved; previous sessions invalidated.')
+                else:
+                    from .analysis_worker import tick
+                    tick(conn)
+                    print('Analytics and briefing updated')
+        return
     if args.command.startswith('dbmf-'):
         from .dbmf import collector as dbmf_collector
         if args.command == 'dbmf-worker':

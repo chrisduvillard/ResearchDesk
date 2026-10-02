@@ -5,7 +5,7 @@ import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 6
 MAX_ID = 2**63 - 1
 DATA_DIR = Path(os.environ.get("DATA_DIR", "/data"))
 
@@ -47,10 +47,19 @@ def set_setting(conn, key, value):
     conn.execute("INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value", (key, json.dumps(value)))
 
 
-def initialize(conn):
+def initialize(conn, *, allow_migration=False):
     version = conn.execute("PRAGMA user_version").fetchone()[0]
+    if version != SCHEMA_VERSION and os.environ.get('REQUIRE_MIGRATION') == '1' and not allow_migration:
+        raise RuntimeError('Run the migration service before starting application services')
     if version > SCHEMA_VERSION:
         raise RuntimeError("Database was created by a newer version of the tracker")
+    if version >= 4:
+        from .dbmf.schema import initialize as initialize_dbmf
+        initialize_dbmf(conn)
+        conn.commit()
+        from .migrations import apply_migrations
+        apply_migrations(conn)
+        return
     conn.executescript('''
     CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY, value TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS instruments(
@@ -92,9 +101,11 @@ def initialize(conn):
     ''')
     from .dbmf.schema import initialize as initialize_dbmf
     initialize_dbmf(conn)
-    conn.execute(f"PRAGMA user_version={SCHEMA_VERSION}")
+    conn.execute("PRAGMA user_version=4")
     from .instruments import SEEDS
     for item in SEEDS:
         cols = list(item)
         conn.execute(f"INSERT OR IGNORE INTO instruments({','.join(cols)}) VALUES({','.join('?' for _ in cols)})", tuple(item.values()))
     conn.commit()
+    from .migrations import apply_migrations
+    apply_migrations(conn)

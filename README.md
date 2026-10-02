@@ -2,10 +2,10 @@
 
 # Research Desk
 
-**Dan Nathan disclosures · DBMF market exposure**
+**Contributor disclosures · ETF positioning · Hypothetical portfolios**
 
 See what changed, explore the charts, and check the original sources.<br>
-Runs on your computer. No account, API key, or AI subscription required.
+Runs on your computer. Free data sources; no AI subscription. One local owner account controls editing.
 
 [Get started](#get-started) · [User guide](docs/guide.md) · [Technical reference](docs/reference.md) · [MIT license](LICENSE)
 
@@ -15,11 +15,14 @@ Runs on your computer. No account, API key, or AI subscription required.
 
 ## What you can do
 
-- **Follow Dan Nathan’s CNBC disclosures:** see additions, removals, price charts, and the original wording.
-- **Explore DBMF:** compare reported market exposures, inspect historical holdings, and see what changed.
-- **Keep your own history:** automatic collection, source archives, CSV downloads, and daily local backups.
+- **Start with Today:** a daily evidence-linked briefing and live changes.
+- **Research contributors and funds:** separate disclosures, reviewed calls, holdings, and comparable exposure measures.
+- **Evaluate explicit rules:** follow/fade scorecards and hypothetical portfolios with saved inputs and visible coverage.
+- **Keep your history:** original Dan Nathan and DBMF views, source archives, exports, and local backups.
 
-Disclosures and exposures are observations, not verified trades or investment recommendations. History starts with your installation; optional DBMF imports add available historical reports, with gaps clearly marked.
+This expansion is in development. WTMF automation remains blocked; other new fund adapters require scheduled qualification before production coverage. See [source coverage and limitations](docs/guide.md#expanded-source-coverage). Existing installations must use the [schema-changing release procedure](docs/reference.md#expansion-migration-and-rollback).
+
+Disclosures and exposures are observations, not verified trades. Models do not represent contributors’ actual returns.
 
 ## Get started
 
@@ -68,7 +71,7 @@ If Linux reports a Docker socket permission error, prefix **Docker commands only
 
 </details>
 
-The first build can take several minutes. When it finishes, open **[localhost:8765](http://localhost:8765)** in your browser. Switch between **Dan Nathan** and **DBMF** at the top. Data may take a little longer to appear while the first collection finishes; check **Data health** for progress or source errors.
+The first build can take several minutes. When it finishes, open **[localhost:8765](http://localhost:8765)** in your browser. Start with **Today**, then use **Contributors**, **Funds**, or **Follow / fade**. The original **Dan** and **DBMF** views remain linked. Data may take a little longer to appear while the first collection finishes; check **Sources & alerts** for progress or source errors. To enable editing, follow [Owner setup](docs/guide.md#owner-setup).
 
 The app runs while your computer and Docker are running. You can close the terminal and browser. Collection pauses while the computer sleeps; reopen Docker Desktop after restarting your computer. It is accessible only on this computer by default; [remote access and configuration](docs/reference.md#open-the-dashboard) are covered separately.
 
@@ -80,7 +83,7 @@ Run these commands from the same project folder:
 | :--- | :--- |
 | Stop the app | `docker compose stop` |
 | Start it again | `docker compose up -d --wait` |
-| Check that all three services are healthy | `docker compose ps` |
+| Check the four services and completed migration | `docker compose ps` |
 | Add available DBMF historical reports | `docker compose exec -T dbmf-collector python -m tracker.cli dbmf-backfill` |
 | Make a backup now | `docker compose exec -T collector python -m tracker.cli backup` |
 

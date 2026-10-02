@@ -1,4 +1,5 @@
 import fcntl
+from contextlib import closing
 import json
 import logging
 import os
@@ -27,22 +28,29 @@ def backup(conn, now=None):
         return _backup(conn, now)
 
 
-def _backup(conn, now=None):
+def _backup(conn, now=None, target=None):
     now = now or db.utcnow()
     directory = db.DATA_DIR / "backups"
     directory.mkdir(parents=True, exist_ok=True)
-    target = directory / f"{now.date().isoformat()}.tar.gz"
+    target = target or directory / f"{now.date().isoformat()}.tar.gz"
     with tempfile.TemporaryDirectory(dir=directory) as work:
         import sqlite3
         dump = Path(work) / "tracker.sqlite3"
-        with sqlite3.connect(dump) as dest:
+        with closing(sqlite3.connect(dump)) as dest:
             conn.backup(dest)
+            dest.execute("PRAGMA journal_mode=DELETE")
+            tables={r[0] for r in dest.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+            if 'sessions' in tables:
+                dest.execute('DELETE FROM sessions')
+                from secrets import token_hex
+                dest.execute("UPDATE settings SET value=? WHERE key='activity_epoch'", (json.dumps(token_hex(16)),))
+                dest.commit()
             if dest.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
                 raise RuntimeError("Backup database integrity check failed")
         temp = Path(work) / "backup.tar.gz"
         with tarfile.open(temp, "w:gz") as archive:
             archive.add(dump, arcname="tracker.sqlite3")
-            for name in ("snapshots", "exports", "dbmf"):
+            for name in ("snapshots", "exports", "dbmf", "sources", "funds"):
                 path = db.DATA_DIR / name
                 if path.exists():
                     archive.add(path, arcname=name)
@@ -165,3 +173,15 @@ def worker():
         except Exception:
             log.exception("Worker loop failed; retrying in 30 seconds")
         time.sleep(30)
+
+
+def migration_backup(conn):
+    """Rollback archives are outside daily rotation and never overwritten."""
+    from secrets import token_hex
+    directory=db.DATA_DIR/'pre-migration'
+    directory.mkdir(parents=True,exist_ok=True)
+    version=conn.execute('PRAGMA user_version').fetchone()[0]
+    name=f"schema-{version}-{db.utcnow().strftime('%Y%m%dT%H%M%S')}-{token_hex(4)}.tar.gz"
+    with (db.DATA_DIR/'backup.lock').open('a') as lock:
+        fcntl.flock(lock,fcntl.LOCK_EX)
+        return _backup(conn,target=directory/name)
