@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#f6f6f2" />
+    <title>Dan Nathan · Disclosure Desk</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23274035'/%3E%3Ctext x='32' y='43' fill='white' font-size='32' text-anchor='middle' font-family='serif'%3EDn%3C/text%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="/static/style.css?v=1.5.1" />
+    <script src="/static/desk-state.js?v=1.5.1" defer></script><script src="/static/desk.js?v=1.5.1" defer></script><script src="/static/vendor/lightweight-charts.js" defer></script>
+    <script src="/static/options.js?v=1.5.1" defer></script>
+    <script src="/static/app.js?v=1.5.1" defer></script>
+  </head>
+  <body>
+    <nav class="desk-switch" aria-label="Dashboard"><a href="/" aria-current="page">Dan Nathan</a><a href="/dbmf">DBMF</a></nav>
+    <header class="topbar">
+      <a class="brand" href="#overview"
+        ><span class="brand-mark">Dn<span>↗</span></span
+        ><span>Disclosure Desk<small>THE DAN NATHAN TRACKER</small></span></a
+      >
+      <nav aria-label="Main navigation">
+        <button class="nav active" data-page="overview" aria-current="page">Overview</button
+        ><button class="nav" data-page="history">
+          History <span id="nav-count">0</span></button
+        ><button class="nav" data-page="scorecard">Scorecard</button>
+      </nav>
+      <div class="host">
+        <span class="status-dot" id="status-dot"></span
+        ><span id="monitor-state">Connecting to server</span>
+      </div>
+    </header>
+    <main>
+      <div id="error-banner" class="alert hidden" role="alert"></div>
+
+    <details id="data-health" class="panel data-health" tabindex="-1">
+      <summary><span><strong>Data health</strong><span id="health-summary">Checking both dashboards…</span></span><span id="health-checked"></span></summary>
+      <div id="health-content"><p class="change-empty">Loading source dates and collection status…</p></div>
+      <div class="alert-settings"><button id="browser-alerts" class="button secondary" aria-pressed="false">Enable browser alerts</button><p id="alert-note"></p></div>
+    </details>
+      <section class="page active" id="page-overview">
+        <div class="page-heading">
+          <div>
+            <div class="eyebrow">PUBLIC DISCLOSURES, MADE READABLE</div>
+            <h1>Dan Nathan’s positions<span class="title-dot">.</span></h1>
+            <p class="muted">
+              Track his disclosed direction. See what happens next.
+            </p>
+          </div>
+          <a
+            class="text-link"
+            href="https://www.cnbc.com/dan-nathan/"
+            target="_blank"
+            rel="noopener"
+            >Original CNBC disclosure ↗</a
+          >
+        </div>
+        <div class="stats">
+          <article>
+            <span class="stat-label">Disclosed instruments</span>
+            <div class="stat-value" id="active-count">—</div>
+            <span class="stat-note">Companies and funds</span>
+          </article>
+          <article>
+            <span class="stat-label">Directional exposure</span>
+            <div class="direction-counts">
+              <span class="bullish"><b id="bull-count">—</b> bullish</span
+              ><span class="slash">/</span
+              ><span class="bearish"><b id="bear-count">—</b> bearish</span>
+            </div>
+            <span class="stat-note" id="exposure-note"
+              >Sizing and portfolio hedges are unknown</span
+            >
+          </article>
+          <article>
+            <span class="stat-label">Source disclosure as of</span>
+            <div class="stat-date" id="source-date">—</div>
+            <span class="stat-note" id="source-time"
+              >Source time in New York</span
+            >
+          </article>
+          <article>
+            <span class="stat-label">Eligible directional signals</span>
+            <div class="stat-value" id="signal-count">—</div>
+            <span class="stat-note">Initial positions are a baseline</span>
+          </article>
+        </div>
+
+        <section class="panel changes-panel" aria-labelledby="changes-heading">
+          <div class="changes-heading"><div><div class="eyebrow">RECENT OBSERVATIONS</div><h2 id="changes-heading">What changed?</h2></div><label>Show changes<select id="changes-period" aria-label="Change summary period"><option value="previous">Since previous check</option><option value="visit">Since my last visit</option></select></label></div>
+          <p id="changes-caption" class="change-caption" role="status">Loading the comparison…</p>
+          <div id="changes-content"></div>
+          <p class="change-footnote">Disclosure observations do not establish actual entry or exit dates.</p>
+        </section>
+        <div class="workspace">
+          <aside class="panel positions-panel">
+            <div class="panel-heading">
+              <h2>Current disclosure</h2>
+              <span class="small-label">SELECT AN INSTRUMENT</span>
+            </div>
+            <div id="positions-list" tabindex="-1" class="positions-list">
+              <div class="empty">Loading the latest disclosure…</div>
+            </div>
+            <div class="panel-bottom">
+              <span class="tiny-dot"></span> Interpretation of public
+              disclosures
+            </div>
+          </aside>
+          <section class="panel chart-panel" id="instrument-detail" tabindex="-1">
+            <div class="chart-top">
+              <div>
+                <div class="eyebrow" id="chart-category">DAILY PRICE CHART</div>
+                <h2 id="chart-title">Select a company or fund</h2>
+                <p id="chart-description" class="muted"></p>
+              </div>
+              <button id="tradingview-button" class="button dark" disabled>
+                TradingView <span>↗</span>
+              </button>
+            </div>
+            <div class="chart-subtitle">
+              <div id="chart-strategy"></div>
+              <span id="chart-direction"></span>
+            </div>
+            <div class="chart-toolbar">
+              <div class="range-buttons" aria-label="Chart range">
+                <button data-range="6" class="active">6M</button
+                ><button data-range="12">1Y</button
+                ><button data-range="24">2Y</button
+                ><button data-range="all">All</button>
+              </div>
+              <label class="check-label"
+                ><input id="shade-toggle" type="checkbox" checked /> Exposure
+                shading</label
+              >
+            </div>
+            <div id="chart-wrap">
+              <div id="chart"></div>
+              <div id="chart-message" class="chart-message hidden"></div>
+              <div id="chart-tooltip" class="chart-tooltip hidden"></div>
+            </div>
+            <div class="chart-footer">
+              <span id="price-note"
+                >Daily prices, adjusted for splits and dividends</span
+              ><span>1D · USD</span>
+            </div>
+            <div id="observation-note" class="observation-note"></div>
+          </section>
+        </div>
+        <details class="panel strategy-panel advanced-options" id="advanced-options">
+          <summary>
+            <span><strong>Advanced options analysis</strong><span class="advanced-options-hint">Strategy details and hypothetical payoff tools</span></span>
+            <span class="advanced-options-chevron" aria-hidden="true">›</span>
+          </summary>
+          <section aria-labelledby="analysis-heading">
+            <div class="analysis-heading">
+              <div><div class="eyebrow">UNDERSTAND THE DISCLOSED STRUCTURE</div>
+                <h2 id="analysis-heading">Strategy analysis</h2>
+                <p class="muted" id="analysis-company">Select a company or fund</p></div>
+              <button id="open-payoff" class="button secondary">Explore a hypothetical payoff ↗</button>
+            </div>
+            <div id="analysis-content" aria-live="polite"><p class="empty">Loading strategy details…</p></div>
+          </section>
+        </details>
+        <div class="bottom-grid">
+          <section class="panel source-panel">
+            <div class="panel-heading">
+              <h2>Source & interpretation</h2>
+              <span class="pill subtle">Evidence preserved</span>
+            </div>
+            <p id="interpretation" class="body-copy"></p>
+            <details>
+              <summary>Read the original disclosure</summary>
+              <blockquote id="source-text"></blockquote>
+            </details>
+          </section>
+          <section class="panel collection-panel">
+            <div class="panel-heading">
+              <h2>Collection status</h2>
+              <span id="health-pill" class="pill subtle">Checking</span>
+            </div>
+            <dl>
+              <div>
+                <dt>Last successful observation</dt>
+                <dd id="last-observed">—</dd>
+              </div>
+              <div>
+                <dt>Next scheduled check</dt>
+                <dd id="next-check">—</dd>
+              </div>
+              <div>
+                <dt>History starts</dt>
+                <dd id="tracking-start">—</dd>
+              </div>
+              <div>
+                <dt>Daily backup</dt>
+                <dd id="last-backup">—</dd>
+              </div>
+            </dl>
+            <p class="fine-print">
+              Checks every day at 22:15 New York time. Observation dates do not
+              establish actual entry or exit dates.
+            </p>
+          </section>
+        </div>
+      </section>
+      <section class="page" id="page-history">
+        <div class="page-heading">
+          <div>
+            <div class="eyebrow">A RECORD THAT SURVIVES THE NEXT UPDATE</div>
+            <h1>Disclosure history<span class="title-dot">.</span></h1>
+            <p class="muted">
+              What changed, when we observed it, and the wording behind it.
+            </p>
+          </div>
+          <a href="/api/export/history.csv" class="button secondary"
+            >Download CSV ↓</a
+          >
+        </div>
+        <div class="panel">
+          <div class="history-tools">
+            <label
+              >Company or fund
+              <select id="history-filter">
+                <option value="">All companies and funds</option>
+              </select></label
+            >
+            <p class="fine-print">
+              “No longer disclosed” does not establish a closing date.
+            </p>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>First observed · New York</th>
+                  <th>Company or fund</th>
+                  <th>Change</th>
+                  <th>Disclosed direction</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="history-body"></tbody>
+            </table>
+          </div>
+          <div id="history-empty" class="empty hidden">
+            No recorded events for this selection.
+          </div>
+          <div class="load-more">
+            <button id="load-more" class="button secondary hidden">
+              Load older events
+            </button>
+          </div>
+        </div>
+      </section>
+      <section class="page" id="page-scorecard">
+        <div class="page-heading">
+          <div>
+            <div class="eyebrow">TEST THE CONTRARIAN HYPOTHESIS</div>
+            <h1>Follow or oppose<span class="title-dot">?</span></h1>
+            <p class="muted">
+              Compare price moves after a new directional disclosure becomes
+              observable.
+            </p>
+          </div>
+          <label class="filter-label"
+            >Company or fund<select id="score-filter">
+              <option value="">All companies and funds</option>
+            </select></label
+          >
+        </div>
+        <div class="score-toolbar">
+          <div
+            class="range-buttons horizon-buttons"
+            aria-label="Scorecard horizon"
+          >
+            <button data-horizon="1">1 session</button
+            ><button data-horizon="5">5 sessions</button
+            ><button data-horizon="20" class="active">20 sessions</button
+            ><button data-horizon="60">60 sessions</button>
+          </div>
+          <span id="sample-note" class="muted"></span>
+        </div>
+        <div class="score-grid" id="score-cards"></div>
+        <div id="score-empty" class="panel score-empty hidden">
+          <span class="empty-glyph">↗ ↘</span>
+          <h2>Building an honest track record.</h2>
+          <p>
+            The first recorded positions form a baseline. New directional
+            disclosures will create signals, and results appear as their
+            measurement periods finish.
+          </p>
+          <span id="pending-note" class="pill subtle"></span>
+        </div>
+        <section class="panel score-table-panel">
+          <div class="panel-heading">
+            <h2>Across time horizons</h2>
+            <span class="small-label">AVERAGE ADJUSTED RETURN</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Trading sessions</th>
+                  <th>Follow</th>
+                  <th>Oppose</th>
+                  <th>Always long</th>
+                  <th>Completed signals</th>
+                  <th>Pending / missing</th>
+                </tr>
+              </thead>
+              <tbody id="score-summary"></tbody>
+            </table>
+          </div>
+        </section>
+        <details class="panel methodology" open>
+          <summary>How the scorecard works</summary>
+          <p id="methodology-text"></p>
+          <p>
+            Actual options returns require strikes, premiums, position sizes and
+            execution dates. A right directional call can still lose money in
+            options.
+          </p>
+        </details>
+        <section class="panel signal-panel">
+          <div class="panel-heading">
+            <h2>Recorded signals</h2>
+            <span class="small-label">FIRST ELIGIBLE MARKET OPEN</span>
+          </div>
+          <div id="signals-list"></div>
+        </section>
+      </section>
+      <footer>
+        <span>Independent research</span
+        ><span
+          >Price data: Yahoo Finance ·
+          <a href="https://www.tradingview.com/" target="_blank" rel="noopener"
+            >Charts by TradingView</a
+          >
+          · <a href="/downloads/guide">User guide</a></span
+        >
+      </footer>
+    </main>
+    <dialog id="export-dialog" aria-labelledby="export-title">
+      <div class="dialog-heading">
+        <div>
+          <div class="eyebrow">DAILY CHART INDICATOR</div>
+          <h2 id="export-title">Take it to TradingView</h2>
+        </div>
+        <button
+          class="icon-button"
+          id="close-export"
+          aria-label="Close TradingView export"
+        >
+          ×
+        </button>
+      </div>
+      <p class="muted" id="export-instrument"></p>
+      <div class="setup-step">
+        <span class="step-number">1</span>
+        <div>
+          <h3>Install the indicator once</h3>
+          <p>
+            Download the script, paste it into TradingView’s Pine Editor, and
+            choose Add to chart. Use a 1-day chart.
+          </p>
+          <a class="button secondary" href="/downloads/dan-nathan.pine"
+            >Download indicator ↓</a
+          >
+          <button id="copy-script" class="button secondary">Copy script</button>
+        </div>
+      </div>
+      <div class="setup-step">
+        <span class="step-number">2</span>
+        <div>
+          <h3>Paste this instrument’s history</h3>
+          <p>
+            Open the indicator’s settings, then paste the export into its text
+            input. Repeat this step to refresh the TradingView annotations.
+          </p>
+          <button id="copy-export" class="button dark">Copy export</button>
+          <p class="fine-print" id="export-coverage"></p>
+        </div>
+      </div>
+      <label class="export-label"
+        >Export data<textarea
+          id="export-text"
+          readonly
+          rows="5"
+          spellcheck="false"
+        ></textarea>
+      </label>
+      <p class="fine-print">
+        The dashboard refreshes automatically. TradingView receives new
+        observations when you paste a fresh export.
+      </p>
+    </dialog>
+    <dialog id="payoff-dialog" aria-labelledby="payoff-title">
+      <div class="dialog-heading">
+        <div><div class="eyebrow">HYPOTHETICAL SCENARIO · NO HISTORY CHANGES</div>
+          <h2 id="payoff-title">Payoff explorer</h2></div>
+        <button class="icon-button" id="close-payoff" aria-label="Close payoff explorer">×</button>
+      </div>
+      <p id="payoff-company" class="muted"></p>
+      <p class="scenario-notice">These are example or user-entered legs. Calculating a scenario does not record a position for Dan.</p>
+      <form id="payoff-form">
+        <div class="payoff-controls">
+          <label>Start with an example<select id="payoff-example">
+            <option value="vertical">Bull call spread</option>
+            <option value="put_spread">Bear put spread</option>
+            <option value="ratio">Call ratio spread · buy 1, sell 2</option>
+            <option value="straddle">Long straddle</option>
+            <option value="condor">Credit iron condor</option>
+            <option value="butterfly">Call butterfly</option>
+            <option value="collar">Protective collar</option>
+            <option value="covered">Covered call</option>
+            <option value="custom">Custom legs</option>
+          </select></label>
+          <label>Total net entry cost · USD<input id="payoff-cost" type="number" step="any" placeholder="Unknown: show expiration value" /></label>
+        </div>
+        <p class="fine-print">Positive cost = paid; negative cost = received. Include shares and all option premiums. Leave blank if unknown.</p>
+        <div class="table-wrap">
+          <table class="legs-editor"><thead><tr><th>Action</th><th>Quantity</th><th>Instrument</th><th>Strike · USD</th><th>Expiration</th><th>Multiplier</th><th></th></tr></thead><tbody id="payoff-legs"></tbody></table>
+        </div>
+        <div class="payoff-actions">
+          <button type="button" id="add-payoff-leg" class="button secondary">+ Add leg</button>
+          <label class="check-label"><input type="checkbox" id="payoff-same-expiry" checked /> Assume a shared expiration when dates are omitted</label>
+        </div>
+        <details class="payoff-range"><summary>Chart price range</summary>
+          <div class="payoff-controls"><label>Minimum price<input id="payoff-min" type="number" min="0" step="any" placeholder="0" /></label><label>Maximum price<input id="payoff-max" type="number" min="0" step="any" placeholder="Automatic" /></label></div>
+        </details>
+        <button type="submit" class="button dark">Calculate payoff</button>
+      </form>
+      <p id="payoff-error" class="alert hidden" role="alert"></p>
+      <div id="payoff-result" aria-live="polite"></div>
+    </dialog>
+    <dialog id="evidence-dialog" aria-labelledby="evidence-title">
+      <div class="dialog-heading">
+        <div>
+          <div class="eyebrow">PRESERVED EVIDENCE</div>
+          <h2 id="evidence-title"></h2>
+        </div>
+        <button
+          class="icon-button"
+          id="close-evidence"
+          aria-label="Close disclosure evidence"
+        >
+          ×
+        </button>
+      </div>
+      <dl id="evidence-metadata"></dl>
+      <h3>Original wording</h3>
+      <blockquote id="evidence-quote"></blockquote>
+      <div id="evidence-strategies"></div>
+      <a id="download-source" class="text-link"
+        >Download original page snapshot ↓</a
+      >
+    </dialog>
+    <div id="toast" class="toast hidden" role="status"></div>
+  </body>
+</html>

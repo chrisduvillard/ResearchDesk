@@ -1,0 +1,86 @@
+iMGP DBi Managed Futures Strategy ETF
+CONSOLIDATED SCHEDULE OF INVESTMENTS IN SECURITIES at December 31, 2023
+
+ Principal
+ Amount^                                                             Value
+SHORT-TERM INVESTMENTS: 85.7%
+REPURCHASE AGREEMENTS: 1.7%
+$11,639,683 Fixed Income Clearing Corp. 1.600%,
+            12/29/2023, due 01/02/2024 [collateral: par
+            value $11,968,800, U.S. Treasury Note,
+            3.875%, due 01/15/2026, value $11,877,571]
+            (proceeds $11,641,753)                               $ 11,639,683
+
+TOTAL REPURCHASE AGREEMENTS
+   (Cost $11,639,683)                                               11,639,683
+TREASURY BILLS: 84.0%
+            U.S. Treasury Bills
+580,000,000     5.196%, 02/29/2024(a)(b)(c)                        575,085,521
+
+TOTAL TREASURY BILLS
+   (Cost $574,976,888)                                             575,085,521
+
+TOTAL SHORT-TERM INVESTMENTS
+   (Cost $586,616,571)                                             586,725,204
+
+TOTAL INVESTMENTS
+   (Cost: $586,616,571): 85.7%                                     586,725,204
+
+Other Assets in Excess of Liabilities: 14.3%                        98,011,406
+
+NET ASSETS: 100.0%                                               $684,736,610
+
+
+Percentages are stated as a percent of net assets.
+
+^          The principal amount is stated in U.S. Dollars unless otherwise
+           indicated.
+(a)        All or a portion of this security is held by the iMGP DBi Cayman
+           Managed Futures Subsidiary.
+(b)        The rate shown represents yield-to-maturity.
+(c)        Issued with a zero coupon. Income is recognized through the
+           accretion of discount.
+
+
+
+
+The accompanying notes are an integral part of these financial statements.
+
+
+      96     Litman Gregory Funds Trust
+iMGP DBi Managed Futures Strategy ETF
+CONSOLIDATED SCHEDULE OF INVESTMENTS IN FUTURES CONTRACTS AT December 31, 2023 (a)
+
+                                                                                                                            Unrealized
+                                                    Number of                                             Expiration       Appreciation/
+Description                                         Contracts         Notional Amount    Notional Value     Date          (Depreciation)
+Futures Contracts – Long
+Euro FX Currency Futures                                 436            $ 59,783,484     $ 60,358,750     3/18/2024        $     575,266
+Gold 100 Oz Futures(b)                                    44               9,037,779        9,115,920     2/27/2024               78,141
+MSCI EAFE Index Futures                                  167              18,748,579       18,807,540     3/15/2024               58,961
+S&P 500 E-Mini Index Futures                             834             196,745,936      200,994,000     3/15/2024            4,248,064
+U.S. Treasury Long Bond Futures                          159              19,653,829       19,865,062     3/19/2024              211,233
+U.S. Treasury Ultra-Long Bond Futures                    138              18,300,592       18,435,938     3/19/2024              135,346
+  Total Long                                                                                                               $ 5,307,011
+Futures Contracts – Short
+3 Months SOFR Futures                                   (595)           $(143,263,392)   $(143,975,125)   9/16/2025        $     (711,733)
+Japanese Yen Currency Futures                         (1,700)            (149,406,515)    (152,490,000)   3/18/2024            (3,083,485)
+MSCI Emerging Market Index                            (2,887)            (142,349,232)    (149,214,595)   3/15/2024            (6,865,363)
+U.S. Treasury 10-Year Note Futures                      (746)             (81,938,726)     (84,216,406)   3/19/2024            (2,277,680)
+U.S. Treasury 10-Year Ultra Note Futures                (708)             (80,410,627)     (83,555,062)   3/19/2024            (3,144,435)
+U.S. Treasury 2-Year Note Futures                       (703)            (143,619,165)    (144,757,586)   3/28/2024            (1,138,421)
+WTI Crude Futures(b)                                    (215)             (15,971,310)     (15,445,600)   3/20/2024               525,710
+  Total Short                                                                                                              $(16,695,407)
+     Total Futures Contracts                                                                                               $(11,388,396)
+
+(a) Societe Generale is the counterparty for all Open Futures Contracts held by the Fund and the iMGP DBi Cayman Managed Futures
+    Subsidiary at December 31, 2023.
+(b) Contract held by the iMGP DBi Cayman Managed Futures Subsidiary.
+
+
+
+
+The accompanying notes are an integral part of these financial statements.
+
+
+                                                                                                           Schedule of Investments      97

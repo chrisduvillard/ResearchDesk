@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f6f6f2"><title>DBMF · Exposure Desk</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23274035'/%3E%3Ctext x='32' y='43' fill='white' font-size='28' text-anchor='middle' font-family='serif'%3EDb%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/style.css?v=1.5.1"><link rel="stylesheet" href="/static/dbmf.css?v=1.5.1">
+  <script src="/static/desk-state.js?v=1.5.1" defer></script><script src="/static/desk.js?v=1.5.1" defer></script><script src="/static/vendor/lightweight-charts.js" defer></script><script src="/static/dbmf.js?v=1.5.1" defer></script>
+</head>
+<body>
+  <nav class="desk-switch" aria-label="Dashboard"><a href="/">Dan Nathan</a><a href="/dbmf" aria-current="page">DBMF</a></nav>
+  <header class="topbar dbmf-topbar">
+    <a class="brand" href="/dbmf"><span class="brand-mark">Db<span>↗</span></span><span>Exposure Desk<small>IMGP DBI MANAGED FUTURES</small></span></a>
+    <div class="host"><span class="status-dot" id="health-dot"></span><span id="health-text">Connecting to server</span></div>
+  </header>
+  <main class="dbmf-main">
+    <div id="dbmf-error" class="alert hidden" role="alert"></div>
+
+    <details id="data-health" class="panel data-health" tabindex="-1">
+      <summary><span><strong>Data health</strong><span id="health-summary">Checking both dashboards…</span></span><span id="health-checked"></span></summary>
+      <div id="health-content"><p class="change-empty">Loading source dates and collection status…</p></div>
+      <div class="alert-settings"><button id="browser-alerts" class="button secondary" aria-pressed="false">Enable browser alerts</button><p id="alert-note"></p></div>
+    </details>
+    <div class="page-heading">
+      <div><div class="eyebrow">A VIEW INSIDE MANAGED FUTURES</div><h1>DBMF’s market exposure<span class="title-dot">.</span></h1><p class="muted">See the positioning. Follow the changes. Put each market in context.</p></div>
+      <a class="text-link" href="https://www.imgp.com/us/fund/US53700T8273-imgp-dbi-managed-futures-strategy-etf/" target="_blank" rel="noopener">Official holdings ↗</a>
+    </div>
+    <div class="stats dbmf-stats" id="summary">
+      <article><span class="stat-label">Holdings date</span><div class="stat-date" id="holdings-date">—</div><span class="stat-note" id="collection-time">Waiting for an accepted report</span></article>
+      <article><span class="stat-label">Fund net assets</span><div class="stat-value" id="net-assets">—</div><span class="stat-note">Matching holdings report · USD</span></article>
+      <article><span class="stat-label">Gross exposure before netting</span><div class="dbmf-longshort"><b class="bullish" id="gross-long">—</b><span>/</span><b class="bearish" id="gross-short">—</b></div><span class="stat-note">Long / short · excludes collateral</span></article>
+      <article><span class="stat-label">Reported collateral</span><div class="stat-value" id="collateral-total">—</div><span class="stat-note">Treasury bills, identified cash and repos</span></article>
+    </div>
+
+        <section class="panel changes-panel" aria-labelledby="changes-heading">
+          <div class="changes-heading"><div><div class="eyebrow">RECENT OBSERVATIONS</div><h2 id="changes-heading">What changed?</h2></div><label>Show changes<select id="changes-period" aria-label="Change summary period"><option value="previous">Since previous report</option><option value="visit">Since my last visit</option></select></label></div>
+          <p id="changes-caption" class="change-caption" role="status">Loading the comparison…</p>
+          <div id="changes-content"></div>
+          <p class="change-footnote">Exposure changes do not establish actual trades.</p>
+        </section>
+    <section id="mapping-review" class="panel dbmf-review hidden" aria-labelledby="mapping-heading">
+      <div class="dbmf-section-heading"><div><div class="eyebrow">SOURCE CHANGES</div><h2 id="mapping-heading">Holdings needing review</h2></div><span id="mapping-count"></span></div>
+      <p class="dbmf-section-note">These downloaded reports contain unfamiliar instruments. Their holdings remain unpublished until the instrument and value basis are verified. The latest accepted portfolio remains visible below.</p>
+      <div class="evidence-table-wrap" id="mapping-items"></div>
+      <p class="dbmf-section-note">After a verified mapping is added, saved reports are reprocessed automatically using their original reporting dates.</p>
+    </section>
+    <section class="panel dbmf-position-panel" id="position-panel" tabindex="-1" aria-labelledby="position-heading">
+      <div class="dbmf-section-heading"><div><div class="eyebrow">SIGNED NOTIONAL / FUND NET ASSETS</div><h2 id="position-heading">Current positioning</h2></div>
+        <div class="dbmf-compare"><label for="comparison">Compare with</label><select id="comparison"><option value="previous">Previous report</option><option value="week">One week earlier</option><option value="month">One month earlier</option><option value="date">Chosen date</option></select><input id="comparison-date" type="date" aria-label="Chosen comparison date" class="hidden"></div>
+      </div>
+      <div class="comparison-caption" id="comparison-caption" role="status">Loading report dates…</div>
+      <div class="bar-legend"><span><i class="legend-current"></i> Current report</span><span><i class="legend-comparison"></i> Comparison report</span><span>Changes in percentage points</span></div>
+      <div class="position-column-head"><span>Market</span><span class="bar-axis"><span>← Short</span><span>0</span><span>Long →</span></span><span>Net</span><span>Change</span></div>
+      <div id="market-bars" aria-label="Market exposures"><p class="empty">Loading holdings…</p></div>
+      <div class="dbmf-position-footer"><label><input type="checkbox" id="former-markets"> Include former markets</label><span id="bar-scale" class="muted"></span></div>
+      <div class="collateral-section"><h3>Collateral</h3><div id="collateral-items"></div><p class="muted" id="collateral-note">Only separately identified collateral is included.</p></div>
+    </section>
+    <section class="panel dbmf-detail-panel" id="market-detail" tabindex="-1" aria-labelledby="detail-heading">
+      <div class="dbmf-section-heading"><div><div class="eyebrow">MARKET DETAIL</div><h2 id="detail-heading">US 2-year Treasury notes</h2></div><label class="market-selector">Market<select id="market-select" aria-label="Selected market"></select></label></div>
+      <div class="detail-navigation"><button class="inline-action" data-jump="position-panel">↑ Current positioning</button><button class="inline-action" data-jump="history-panel">Exposure history ↓</button><div class="dbmf-ranges" role="group" aria-label="Detail chart range"><button data-range="1">1M</button><button data-range="3">3M</button><button data-range="6">6M</button><button data-range="12">1Y</button><button data-range="all">All</button></div></div>
+      <div class="detail-metrics" id="detail-metrics"></div>
+      <div class="dbmf-price-heading"><h3 id="price-label">Price reference</h3><span id="price-date" class="muted"></span></div>
+      <p id="price-note" class="dbmf-section-note"></p><p id="price-error" class="dbmf-price-error hidden" role="status"></p>
+      <details id="price-quality" class="dbmf-evidence hidden"><summary id="price-quality-summary">Excluded price bars</summary><div id="price-quality-content"></div></details>
+      <div id="detail-readout" class="detail-readout" aria-live="polite">Move over the chart for a date, price and observed exposure.</div>
+      <div class="dbmf-chart-label">Price reference · upper panel <span>Observed net exposure (%) · lower panel</span></div>
+      <div id="dbmf-chart" aria-label="Synchronized daily price and exposure charts"></div>
+      <p class="dbmf-section-note">Exposure marks appear only on reporting dates. Lines are not drawn between unknown positions. Scroll or pinch to zoom both panels together.</p>
+      <div class="dbmf-evidence-toolbar"><label for="evidence-report">Inspect report</label><select id="evidence-report"></select></div>
+      <details class="dbmf-evidence" id="contract-evidence"><summary>Contract holdings and source evidence</summary><div id="evidence-content"></div></details>
+    </section>
+    <section class="panel dbmf-history-panel" id="history-panel" tabindex="-1" aria-labelledby="history-heading">
+      <div class="dbmf-section-heading"><div><div class="eyebrow">OBSERVATIONS THROUGH TIME</div><h2 id="history-heading">Exposure history</h2></div><div class="dbmf-ranges" role="group" aria-label="Chart and history range"><button data-range="1">1M</button><button data-range="3">3M</button><button data-range="6">6M</button><button data-range="12">1Y</button><button data-range="all" class="active" aria-pressed="true">All</button></div></div>
+      <p class="dbmf-section-note">Select a cell to inspect a market and compare that report with today. ◇ Historical report · ● Collected daily report · striped columns show unobserved periods.</p>
+      <div id="heatmap" class="heatmap-wrap" tabindex="0" role="region" aria-label="Exposure history, scroll horizontally for all dates"></div>
+      <div class="heatmap-legend"><span class="bearish">Short</span><i></i><span class="bullish">Long</span><span>Colour intensity is capped at 100%; values retain the full exposure.</span></div>
+      <div class="coverage-caption" id="coverage-caption"></div>
+    </section>
+    <details class="panel revision-panel" id="revision-panel" tabindex="-1">
+      <summary><span><strong>Source revisions</strong><span>Compare preserved versions of the same report</span></span><span id="revision-count"></span></summary>
+      <div class="revision-toolbar"><label for="revision-select">Report revision</label><select id="revision-select"><option value="">Loading revisions…</option></select><button id="older-revisions" class="button secondary hidden">Load older revisions</button></div>
+      <div id="revision-content" aria-live="polite"><p class="change-empty">Loading preserved revisions…</p></div>
+    </details>
+    <section class="dbmf-method" aria-label="How to read this dashboard"><h3>How to read the exposure</h3><p>Signed notional value ÷ total fund net assets × 100. Exposures can exceed 100% and do not measure risk contribution. Gross exposure is calculated before opposing contracts are netted. Exposure changes do not establish actual trades.</p><p>Bond direction refers to bond prices. Currency direction refers to the named currency against the US dollar. Historical reports are observations on their stated dates; positions between reports are unknown. ETF proxies and futures references may differ from the contracts DBMF held. No portfolio return is estimated.</p></section>
+    <footer class="dbmf-footer"><div id="schedule-note">Collection runs on the server.</div><div><a href="/api/dbmf/export/history.csv">Download exposure history CSV</a><a href="/downloads/guide">Guide</a></div></footer>
+  </main>
+</body>
+</html>

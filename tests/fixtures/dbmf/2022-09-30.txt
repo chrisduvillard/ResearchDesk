@@ -1,0 +1,51 @@
+iMGP DBi Managed Futures Strategy ETF
+CONSOLIDATED SCHEDULE OF INVESTMENTS IN SECURITIES at September 30, 2022 (Unaudited)
+
+TOTAL INVESTMENTS
+(Cost: $0): 0.0%                                                    0
+Other Assets in Excess of Liabilities: 100.0%             920,594,178
+NET ASSETS: 100.0%                                       $920,594,178
+
+The cost basis of investments for federal income tax purposes at
+September 30, 2022 was as follows*:
+
+Cost of investments                                      $            —
+Gross unrealized appreciation                             28,477,227
+Gross unrealized depreciation                             (1,217,646)
+Net unrealized appreciation                              $27,259,581
+
+* Because tax adjustments are calculated annually, the above
+  table does not reflect tax adjustments. For the previous fiscal
+  year’s federal income tax information, please refer to the Notes
+  to Financial Statements section in the Fund’s most recent semi-
+  annual or annual report.
+iMGP DBi Managed Futures Strategy ETF
+
+CONSOLIDATED SCHEDULE OF INVESTMENTS IN FUTURES CONTRACTS at September 30, 2022 (Unaudited)(a)
+
+                                                                                                                                                 Unrealized
+                                                                     Number of                                                Expiration       Appreciation/
+Description                                                          Contracts       Notional Amount      Notional Value        Date           (Depreciation)
+Futures Contracts - Long
+S&P 500 E Mini Index                                                          53         10,399,194      $     9,543,975     12/16/2022 $ (855,219)
+WTI Crude Futures (b)                                                         94          7,762,107            7,399,680     11/21/2022     (362,427)
+     Total Long                                                                                                                         $ (1,217,646)
+Futures Contracts - Short
+30 Day Federal Funds Futures                                                 (258)      (103,092,911) $ (102,977,113)         1/31/2023 $ 115,798
+90-day Euro-Dollar Futures                                                   (894)      (214,310,121) (213,822,450)           3/18/2024     487,671
+Euro FX Currency Futures                                                   (3,266)      (406,255,645) (402,595,738)          12/19/2022   3,659,907
+Gold 100 Oz Futures (b)                                                      (630)      (106,390,425) (105,336,000)          12/28/2022   1,054,425
+Japanese Yen Currency Futures                                              (1,424)      (125,526,592) (123,950,300)          12/19/2022   1,576,292
+MSCI EAFE Index Futures                                                      (999)       (87,493,525)    (82,946,970)        12/16/2022   4,546,555
+MSCI Emerging Market Index                                                   (425)       (20,214,540)    (18,519,375)        12/16/2022   1,695,165
+U.S. Treasury 10-Year Note Futures                                           (897)      (102,655,978) (100,520,062)          12/20/2022   2,135,916
+U.S. Treasury 10-Year Ultra Note Futures                                     (838)      (101,980,946)    (99,289,906)        12/20/2022   2,691,040
+U.S. Treasury 2-Year Note Futures                                          (1,043)      (215,678,860) (214,222,423)          12/30/2022   1,456,437
+U.S. Treasury Bonds 20 Year Bond Futures                                     (625)       (83,193,738)    (79,003,906)        12/20/2022   4,189,832
+U.S. Treasury Ultra-Long Bond Futures                                        (565)       (82,273,189)    (77,405,000)        12/20/2022   4,868,189
+     Total Short                                                                                                                        $28,477,227
+          Total Futures Contracts                                                                                                       $27,259,581
+
+(a)   Societe Generale is the counterparty for all Open Futures Contracts held by the Fund and the iMGP DBi Cayman Managed Futures
+      Subsidiary at September 30, 2022.
+(b)   Contract held by the iMGP DBi Cayman Managed Futures Subsidiary.

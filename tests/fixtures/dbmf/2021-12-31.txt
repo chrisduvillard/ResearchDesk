@@ -1,0 +1,87 @@
+iMGP DBi Managed Futures Strategy ETF (formerly iM DBi Managed Futures Strategy ETF)
+CONSOLIDATED SCHEDULE OF INVESTMENTS IN SECURITIES at December 31, 2021
+
+Principal
+Amount                                                                     Value
+SHORT-TERM INVESTMENTS: 23.0%
+TREASURY BILLS: 23.0%(a)(b)
+           United States Treasury Bills
+$1,830,000     (0.000%), 01/06/2022(c)                                 $ 1,830,000
+   154,000     0.008%, 01/13/2022                                          154,000
+ 1,073,000     0.006%, 01/20/2022(c)                                     1,072,996
+ 1,834,000     0.020%, 01/27/2022                                        1,833,973
+ 3,554,000     0.023%, 02/03/2022(c)                                     3,553,923
+   360,000     0.026%, 02/10/2022                                          359,990
+ 1,551,000     0.024%, 02/17/2022(c)                                     1,550,952
+ 1,139,000     0.022%, 02/24/2022(c)                                     1,138,963
+   184,000     0.041%, 03/03/2022(c)                                       183,987
+   767,000     0.036%, 03/10/2022(c)                                       766,947
+ 1,422,000     0.049%, 03/17/2022                                        1,421,855
+
+TOTAL TREASURY BILLS
+   (Cost $13,867,686)                                                     13,867,586
+
+TOTAL SHORT-TERM INVESTMENTS
+   (Cost $13,867,686)                                                     13,867,586
+
+TOTAL INVESTMENTS
+   (Cost: $13,867,686): 23.0%                                             13,867,586
+
+Other Assets in Excess of Liabilities: 77.0%                              46,511,829
+
+NET ASSETS: 100.0%                                                     $60,379,415
+
+
+Percentages are stated as a percent of net assets.
+
+(a)         All or a portion of this security is held as collateral for certain
+            futures contracts.
+(b)         The rate shown represents yield-to-maturity.
+(c)         All or a portion of this security is held by the iM DBi Cayman
+            Managed Futures Subsidiary.
+
+
+
+
+The accompanying notes are an integral part of these consolidated financial statements.
+
+
+      116      Litman Gregory Funds Trust
+iMGP DBi Managed Futures Strategy ETF (formerly iM DBi Managed Futures Strategy ETF)
+CONSOLIDATED SCHEDULE OF INVESTMENTS IN FUTURES CONTRACTS at December 31, 2021(a)
+
+                                                                                                                                   Unrealized
+                                                          Number of               Notional        Notional       Expiration       Appreciation/
+Description                                               Contracts               Amount           Value           Date          (Depreciation)
+Futures Contracts – Long
+WTI Crude Futures (b)                                                  112         7,954,748    $ 8,386,560      3/22/2022         $ 431,812
+S&P 500 E-mini Index Futures                                            22         5,160,578      5,234,350      3/18/2022            73,772
+Gold 100 Oz. Futures (b)                                                46         8,213,859      8,411,560      2/24/2022           197,701
+MSCI EAFE Index Futures                                                 43         4,962,801      4,991,870      3/18/2022            29,069
+U.S. Treasury Ultra Bond Futures                                        32         6,386,632      6,308,000      3/22/2022           (78,632)
+U.S. Treasury Long Bond Futures                                         39         6,311,795      6,257,062      3/22/2022           (54,733)
+  Total Long                                                                                                                       $ 598,989
+Futures Contracts – Short
+90-day Euro-Dollar Futures                                             (40)       (9,861,828)   $ (9,863,000)    6/19/2023         $ (1,172)
+30-day Fed Fund Futures                                                (19)       (7,902,666)     (7,898,694)    4/29/2022             3,972
+Euro FX Currency Futures                                              (229)      (32,326,675)    (32,639,656)    3/14/2022          (312,981)
+MSCI Emerging Market Index                                             (43)       (2,603,653)     (2,636,545)    3/18/2022           (32,892)
+U.S. Treasury 10-Year Ultra Bond Futures                               (57)       (8,222,461)     (8,346,937)    3/22/2022          (124,476)
+Japanese Yen Currency Futures                                         (428)      (47,055,753)    (46,534,300)    3/14/2022           521,453
+U.S. Treasury 2-Year Note Futures                                      (46)      (10,048,954)    (10,035,906)    3/31/2022            13,048
+U.S. Treasury 10-Year Note Futures                                     (65)       (8,401,840)     (8,480,469)    3/22/2022           (78,629)
+  Total Short                                                                                                                      $ (11,677)
+     Total Futures Contracts                                                                                                       $ 587,312
+
+
+(a) Societe Generale is the counterparty for all Open Futures Contracts held by the Fund and the iM DBi Cayman Managed Futures
+    Subsidiary at December 31, 2021.
+(b) Contract held by the iM DBi Cayman Managed Futures Subsidiary.
+
+
+
+
+The accompanying notes are an integral part of these consolidated financial statements.
+
+
+                                                                                                                Schedule of Investments    117

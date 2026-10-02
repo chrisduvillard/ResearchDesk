@@ -1,0 +1,53 @@
+iMGP DBi Managed Futures Strategy ETF
+CONSOLIDATED SCHEDULE OF INVESTMENTS IN SECURITIES at December 31, 2022
+
+TOTAL INVESTMENTS
+   (Cost: $0): 0.0%                                          $            0
+
+Other Assets in Excess of Liabilities: 100.0%                    951,319,050
+
+NET ASSETS: 100.0%                                           $951,319,050
+
+
+
+
+The accompanying notes are an integral part of these financial statements.
+
+
+  110       Litman Gregory Funds Trust
+iMGP DBi Managed Futures Strategy ETF
+CONSOLIDATED SCHEDULE OF INVESTMENTS IN FUTURES CONTRACTS at December 31, 2022(a)
+
+                                                                                                                            Unrealized
+                                                    Number of                                             Expiration       Appreciation/
+Description                                         Contracts         Notional Amount    Notional Value     Date          (Depreciation)
+Futures Contracts – Long
+Japanese Yen Currency Futures                            723            $ 67,823,322     $ 69,652,012     3/13/2023        $ 1,828,690
+MSCI EAFE Index Futures                                  615              60,915,860       59,944,050     3/17/2023           (971,810)
+WTI Crude Futures (b)                                    206              16,411,673       16,572,700     3/21/2023            161,027
+      Total Long                                                                                                           $ 1,017,907
+Futures Contracts – Short
+3 Months SOFR Futures                                 (1,339)           $(323,030,255)   $(322,129,925)   6/17/2024        $    900,330
+30 Day Federal Funds Futures                            (342)            (135,563,977)    (135,585,346)   4/28/2023             (21,369)
+Euro FX Currency Futures                              (1,284)            (172,202,966)    (172,601,700)   3/13/2023            (398,734)
+Gold 100 Oz Futures (b)                                 (354)             (62,948,677)     (64,647,480)   2/24/2023          (1,698,803)
+MSCI Emerging Market Index                            (1,265)             (62,094,775)     (60,682,050)   3/17/2023           1,412,725
+S&P 500 E-Mini Index Futures                            (491)             (94,945,518)     (94,787,550)   3/17/2023             157,968
+U.S. Treasury 10-Year Note Futures                    (1,150)            (130,171,606)    (129,141,406)   3/22/2023           1,030,200
+U.S. Treasury 10-Year Ultra Note Futures              (1,083)            (129,454,116)    (128,098,594)   3/22/2023           1,355,522
+U.S. Treasury 2-Year Note Futures                     (1,563)            (320,419,966)    (320,537,111)   3/31/2023            (117,145)
+U.S. Treasury Long Bond Futures                         (398)             (50,754,610)     (49,886,812)   3/22/2023             867,798
+U.S. Treasury Ultra-Long Bond Futures                   (362)             (49,917,006)     (48,621,125)   3/22/2023           1,295,881
+      Total Short                                                                                                          $ 4,784,373
+        Total Futures Contracts                                                                                            $ 5,802,280
+(a)     Societe Generale is the counterparty for all Open Futures Contracts held by the Fund and the iMGP DBi Cayman Managed Futures
+        Subsidiary at December 31, 2022.
+(b)     Contract held by the iMGP DBi Cayman Managed Futures Subsidiary.
+
+
+
+
+The accompanying notes are an integral part of these financial statements.
+
+
+                                                                                                          Schedule of Investments      111

@@ -1,0 +1,29 @@
+.venv/
+__pycache__/
+.pytest_cache/
+node_modules/
+tracker/static/vendor/
+.env
+data/
+*.pyc
+tmp/
+
+# Local runtime data and secrets
+.env.*
+!.env.example
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-*
+*.pem
+*.key
+backups/
+recovery/
+exports/
+coverage/
+.coverage
+htmlcov/
+
+# Temporary backup restoration candidates
+restore-inbox/
+data-before-restore*/

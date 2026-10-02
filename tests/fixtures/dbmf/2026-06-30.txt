@@ -1,0 +1,92 @@
+iMGP DBi Managed Futures Strategy ETF
+CONSOLIDATED SCHEDULE OF INVESTMENTS IN SECURITIES at June 30, 2026 (Unaudited)
+
+    Principal
+    Amount^                                                     Value
+SHORT-TERM INVESTMENTS: 80.6%
+REPURCHASE AGREEMENTS: 3.3%
+$129,381,148 Fixed Income Clearing Corp.
+             1.060%, 6/30/2026, due
+             07/01/2026 [collateral: par value
+             $131,872,400, U.S. Treasury Note,
+             3.625%, due 03/31/2028, value
+             $131,982,115] (proceeds
+             $129,384,958)                                $    129,381,148
+
+TOTAL REPURCHASE AGREEMENTS
+   (Cost $129,381,148)                                         129,381,148
+
+TREASURY BILLS: 77.3%
+              U.S. Treasury Bills
+2,051,000,000     3.356%, 07/16/2026(a)(b)(c)                 2,047,940,593
+   37,000,000     3.456%, 07/30/2026(a)(b)(c)                    36,893,445
+  312,000,000     3.466%, 08/06/2026(a)(b)(c)                   310,888,635
+   45,000,000     3.540%, 08/27/2026(a)(b)                       44,743,322
+   50,000,000     3.551%, 09/03/2026(a)(b)                       49,679,449
+   28,000,000     3.624%, 09/17/2026(a)(b)(c)                    27,777,353
+  490,000,000     3.628%, 09/24/2026(a)(b)                      485,752,857
+
+TOTAL TREASURY BILLS
+   (Cost $3,003,675,654)                                      3,003,675,654
+
+TOTAL SHORT-TERM INVESTMENTS
+   (Cost $3,133,056,802)                                      3,133,056,802
+
+TOTAL INVESTMENTS
+   (Cost: $3,133,056,802): 80.6%                              3,133,056,802
+
+Other Assets in Excess of Liabilities: 19.4%                   754,417,377
+
+NET ASSETS: 100.0%                                        $3,887,474,179
+
+
+Percentages are stated as a percent of net assets.
+
+^         The principal amount is stated in U.S. Dollars unless otherwise
+          indicated.
+(a)       Issued with a zero coupon. Income is recognized through the
+          accretion of discount.
+(b)       The rate shown represents yield-to-maturity.
+(c)       All or a portion of this security is held by the iMGP DBi Cayman
+          Managed Futures Subsidiary.
+
+
+
+
+The accompanying notes are an integral part of these financial statements.
+
+
+                                                                                  Schedule of Investments   39
+iMGP DBi Managed Futures Strategy ETF
+CONSOLIDATED SCHEDULE OF INVESTMENTS IN FUTURES CONTRACTS at June 30, 2026 (Unaudited) (a)
+
+                                                                                                                                Unrealized
+                                                      Number of                                                Expiration      Appreciation/
+Description                                           Contracts         Notional Amount    Notional Value        Date         (Depreciation)
+Futures Contracts – Long
+MSCI EAFE Index Futures                                     4,900       $    752,060,082   $   770,598,500     9/18/2026      $ 18,538,418
+MSCI Emerging Market Index                                  3,722            314,425,013       327,033,530     9/18/2026        12,608,517
+S&P 500 E-Mini Index Futures                                1,998            744,599,949       754,070,175     9/18/2026         9,470,226
+WTI Crude Futures(b)                                        3,382            253,049,118       234,271,140     8/20/2026       (18,777,978)
+      Total Long                                                                                                              $ 21,839,183
+Futures Contracts – Short
+EURO FX Currency Futures                                  (3,504)       $ (502,145,059)    $ (501,794,700)     9/14/2026      $      350,359
+Gold 100 Oz Futures(b)                                      (579)          (252,332,188)      (233,829,150)    8/27/2026          18,503,038
+Japanese Yen Currency Futures                            (30,451)        (2,386,486,940)    (2,355,004,212)    9/14/2026          31,482,728
+U.S. Treasury 10-Year Note Futures                       (14,681)        (1,608,477,126)    (1,613,304,266)    9/21/2026          (4,827,140)
+U.S. Treasury 2-Year Note Futures                        (18,637)        (3,845,887,916)    (3,841,697,217)    9/30/2026           4,190,699
+U.S. Treasury Long Bond Futures                           (3,134)          (352,588,483)      (355,709,000)    9/21/2026          (3,120,517)
+      Total Short                                                                                                             $ 46,579,167
+           Total Futures Contracts                                                                                            $ 68,418,350
+
+(a)        Goldman Sachs & Co. and Societe Generale are the counterparties for all Open Futures Contracts held by the Fund and the iMGP DBi
+           Cayman Managed Futures Subsidiary at June 30, 2026.
+(b)        Contract held by the iMGP DBi Cayman Managed Futures Subsidiary.
+
+
+
+
+The accompanying notes are an integral part of these financial statements.
+
+
+      40       iM Global Partner Funds

@@ -1,0 +1,28 @@
+name: First-time setup feedback
+description: Tell us where installation or everyday use was confusing.
+title: "Setup feedback: "
+body:
+  - type: input
+    id: system
+    attributes:
+      label: Computer and operating system
+      placeholder: For example, Windows 11 or macOS 15 on Apple Silicon
+    validations:
+      required: true
+  - type: textarea
+    id: experience
+    attributes:
+      label: What did you try, and where did you get stuck?
+      description: Include the README step and the exact error, if any. Remove private paths, account details, and secrets.
+    validations:
+      required: true
+  - type: checkboxes
+    id: completed
+    attributes:
+      label: What worked?
+      options:
+        - label: Download and first startup
+        - label: Opening both dashboards
+        - label: Stopping and restarting
+        - label: Making a backup
+        - label: Updating the app

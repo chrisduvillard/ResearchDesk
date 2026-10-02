@@ -1,0 +1,82 @@
+iMGP DBi Managed Futures Strategy ETF
+CONSOLIDATED SCHEDULE OF INVESTMENTS IN SECURITIES at March 31, 2024 (Unaudited)
+
+    Principal
+    Amount^                                                    Value
+SHORT-TERM INVESTMENTS: 67.9%
+REPURCHASE AGREEMENTS: 2.9%
+$27,508,031       Fixed Income Clearing Corp.
+                  1.600%, 3/28/2024, due
+                  04/01/2024 [collateral: par
+                  value $29,976,900, U.S.
+                  Treasury Note, 0.250%, due
+                  09/30/2025, value
+                  $28,059,051] (proceeds
+                  $27,512,922)                            $ 27,508,031
+TOTAL REPURCHASE AGREEMENTS
+  (Cost $27,508,031)                                        27,508,031
+TREASURY BILLS: 65.0%
+              U.S. Treasury Bills
+616,000,000       5.129%, 06/18/2024(a)(b)(c)              609,085,092
+TOTAL TREASURY BILLS
+  (Cost $609,066,483)                                      609,085,092
+TOTAL SHORT-TERM INVESTMENTS
+  (Cost $636,574,514)                                      636,593,123
+TOTAL INVESTMENTS
+(Cost: $636,574,514): 67.9%                                636,593,123
+Other Assets in Excess of Liabilities: 32.1%               301,022,293
+NET ASSETS: 100.0%                                        $937,615,416
+
+Percentages are stated as a percent of net assets.
+^         The principal amount is stated in U.S. Dollars unless
+          otherwise indicated.
+(a)       The rate shown represents yield-to-maturity.
+(b)       Issued with a zero coupon. Income is recognized through
+          the accretion of discount.
+(c)       All or a portion of this security is held by the iMGP DBi
+          Cayman Managed Futures Subsidiary.
+
+The cost basis of investments for federal income tax purposes at
+March 31, 2024 was as follows*:
+
+Cost of investments                                       $636,574,514
+Gross unrealized appreciation                               38,868,215
+Gross unrealized depreciation                               (1,083,678)
+Net unrealized appreciation                               $ 37,784,537
+
+* Because tax adjustments are calculated annually, the above
+  table does not reflect tax adjustments. For the previous fiscal
+  year’s federal income tax information, please refer to the Notes
+  to Financial Statements section in the Fund’s most recent semi-
+  annual or annual report.
+                                                                                             ˆ200GZ3t8z=B%pM1ouŠ       200GZ3t8z=B%pM1ou
+                                                        FWPLAN-PR16
+STATE STREET LITMAN               Donnelley Financial   24.02.08.0    LSWpf_rend      02-May-2024 07:06 EST                        833112 TX 67 6*
+LITMAN GREGORY FORM               None                                ICA                                                                HTM ESS 0C
+                                                                                                                                        Page 1 of 1
+iMGP DBi Managed Futures Strategy ETF
+
+CONSOLIDATED SCHEDULE OF INVESTMENTS IN FUTURES CONTRACTS AT March 31, 2024 (Unaudited)(a)
+
+                                                                                                                                             Unrealized
+                                                                      Number of                                            Expiration      Appreciation/
+Description                                                           Contracts    Notional Amount    Notional Value         Date          (Depreciation)
+Futures Contracts - Long
+Gold 100 Oz Futures (b)                                                     801    $ 176,230,576     $ 179,295,840         6/26/2024 $ 3,065,264
+MSCI EAFE Index Futures                                                   5,686      669,189,407       670,123,530         6/21/2024     934,123
+S&P 500 E-Mini Index Futures                                                684      178,746,093       181,550,700         6/21/2024   2,804,607
+U.S. Treasury Long Bond Futures                                             745       88,692,338        89,725,938         6/18/2024   1,033,600
+WTI Crude Futures (b)                                                     1,943      156,941,820       160,142,060         5/21/2024   3,200,240
+     Total Long                                                                                                                      $11,037,834
+Futures Contracts - Short
+Euro FX Currency Futures                                                 (5,331) $(731,961,421) $(721,117,706)             6/17/2024 $10,843,715
+Japanese Yen Currency Futures                                            (7,155) (614,287,635) (597,934,406)               6/17/2024 16,353,229
+MSCI Emerging Market Index                                                 (593)   (31,061,589)   (31,102,850)             6/21/2024     (41,261)
+U.S. Treasury 10-Year Note Futures                                       (2,795) (308,634,849) (309,677,266)               6/18/2024 (1,042,417)
+U.S. Treasury 2-Year Note Futures                                        (4,448) (910,161,332) (909,546,504)               6/28/2024     614,828
+     Total Short                                                                                                                     $26,728,094
+          Total Futures Contracts                                                                                                    $37,765,928
+
+(a)   Societe Generale is the counterparty for all Open Futures Contracts held by the Fund and the iMGP DBi Cayman Managed Futures
+      Subsidiary at March 31, 2024.
+(b)   Contract held by the iMGP DBi Cayman Managed Futures Subsidiary.

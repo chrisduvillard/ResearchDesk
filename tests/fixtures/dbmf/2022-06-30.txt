@@ -1,0 +1,54 @@
+iMGP DBi Managed Futures Strategy ETF
+CONSOLIDATED SCHEDULE OF INVESTMENTS IN SECURITIES at June 30, 2022 (Unaudited)
+
+TOTAL INVESTMENTS
+   (Cost: $0): 0.0%                                                      0
+
+Other Assets in Excess of Liabilities: 100.0%                  332,973,092
+
+NET ASSETS: 100.0%                                           $332,973,092
+
+
+
+
+The accompanying notes are an integral part of these financial statements.
+
+
+  116       Litman Gregory Funds Trust
+iMGP DBi Managed Futures Strategy ETF
+CONSOLIDATED SCHEDULE OF INVESTMENTS IN FUTURES CONTRACTS at June 30, 2022 (Unaudited)(a)
+
+                                                                                                                                      Unrealized
+                                                                   Number of                                         Expiration      Appreciation/
+Description                                                        Contracts   Notional Amount   Notional Value        Date         (Depreciation)
+Futures Contracts – Long
+WTI Crude Futures(b)                                                    521       53,293,958     $ 53,715,100         8/22/2022      $ 421,142
+  Total Long                                                                                                                         $ 421,142
+Futures Contracts – Short
+30 Day Federal Funds Futures                                           (103)     (41,748,372)    $ (41,714,045)      10/31/2022      $    34,327
+90-day Euro-Dollar Futures                                             (204)     (49,112,963)      (49,421,550)      12/18/2023         (308,587)
+Euro FX Currency Futures                                               (342)     (45,244,081)      (45,049,950)       9/19/2022          194,131
+Gold 100 Oz Futures(b)                                                  (95)     (17,416,842)      (17,169,350)       8/29/2022          247,492
+Japanese Yen Currency Futures                                        (1,809)    (168,962,608)     (167,682,994)       9/19/2022        1,279,614
+MSCI EAFE Index Futures                                                (132)     (12,230,953)      (12,253,560)       9/16/2022          (22,607)
+MSCI Emerging Market Index                                             (559)     (28,367,329)      (28,025,465)       9/16/2022          341,864
+S&P 500 E-Mini Index Futures                                           (204)     (38,284,957)      (38,652,900)       9/16/2022         (367,943)
+U.S. Treasury 10-Year Note Futures                                      (92)     (10,668,835)      (10,904,875)       9/21/2022         (236,040)
+U.S. Treasury 10-Year Ultra Note Futures                                (84)     (10,416,442)      (10,699,500)       9/21/2022         (283,058)
+U.S. Treasury 2-Year Note Futures                                      (237)     (49,755,003)      (49,773,703)       9/30/2022          (18,700)
+U.S. Treasury Bonds 20 Year Bond Futures                               (160)     (21,499,328)      (22,180,000)       9/21/2022         (680,672)
+U.S. Treasury Ultra-Long Bond Futures                                  (140)     (20,909,601)      (21,608,125)       9/21/2022         (698,524)
+  Total Short                                                                                                                        $ (518,703)
+     Total Futures Contracts                                                                                                         $ (97,561)
+
+(a) Societe Generale is the counterparty for all Open Futures Contracts held by the Fund and the iMGP DBi Cayman Managed Futures
+    Subsidiary at June 30, 2022.
+(b) Contract held by the iMGP DBi Cayman Managed Futures Subsidiary.
+
+
+
+
+The accompanying notes are an integral part of these financial statements.
+
+
+                                                                                                                  Schedule of Investments    117

@@ -1,0 +1,80 @@
+                                                                                                   ˆ200FzZe6$c2KGNuGÉŠ
+                                                                                                                    200FzZe6$c2KGNuG
+                                                            VDI-W10-PF-0634
+STATE STREET LITMAN                 Donnelley Financial     23.10.18.0        LSWsingk1an   02-Nov-2023 06:46 EST               563186 TX 63 10*
+LITMAN GREGORY FORM                 None                                      ICA                                                     HTM ESS 0C
+                                                                                                                                     Page 1 of 1
+iMGP DBi Managed Futures Strategy ETF
+CONSOLIDATED SCHEDULE OF INVESTMENTS IN SECURITIES at September 30, 2023 (Unaudited)
+
+      Principal
+      Amount^                                                  Value
+SHORT-TERM INVESTMENTS: 73.2%
+TREASURY BILLS: 73.2%
+               U.S. Treasury Bills
+$710,000,000       5.250%, 02/29/2024(a)(b)               $694,323,299
+TOTAL TREASURY BILLS
+  (Cost $694,260,976)                                      694,323,299
+TOTAL SHORT-TERM INVESTMENTS
+  (Cost $694,260,976)                                      694,323,299
+TOTAL INVESTMENTS
+(Cost: $694,260,976): 73.2%                                694,323,299
+Other Assets in Excess of Liabilities: 26.8%               254,352,976
+NET ASSETS: 100.0%                                        $948,676,275
+
+Percentages are stated as a percent of net assets.
+^          The principal amount is stated in U.S. Dollars unless
+           otherwise indicated.
+(a)        The rate shown represents yield-to-maturity.
+(b)        Issued with a zero coupon. Income is recognized through
+           the accretion of discount.
+
+The cost basis of investments for federal income tax purposes at
+September 30, 2023 was as follows*:
+
+Cost of investments                                       $694,260,976
+Gross unrealized appreciation                               34,350,790
+Gross unrealized depreciation                               (3,850,601)
+Net unrealized appreciation                               $ 30,500,189
+
+* Because tax adjustments are calculated annually, the above
+  table does not reflect tax adjustments. For the previous fiscal
+  year’s federal income tax information, please refer to the Notes
+  to Financial Statements section in the Fund’s most recent semi-
+  annual or annual report.
+                                                                                                  ˆ200FzZe6$c2SJvuoÅŠ     200FzZe6$c2SJvuo¯
+                                                        VDI-W10-PF-0145
+STATE STREET LITMAN               Donnelley Financial   23.10.18.0        LSWbiswn0an      02-Nov-2023 07:21 EST                       563186 TX 64 9*
+LITMAN GREGORY FORM               None                                    ICA                                                                HTM ESS 0C
+                                                                                                                                            Page 1 of 1
+iMGP DBi Managed Futures Strategy ETF
+
+CONSOLIDATED SCHEDULE OF INVESTMENTS IN FUTURES CONTRACTS AT September 30, 2023 (Unaudited)(a)
+
+                                                                                                                                                Unrealized
+                                                                     Number of                                               Expiration       Appreciation/
+Description                                                          Contracts       Notional Amount     Notional Value        Date           (Depreciation)
+Futures Contracts - Long
+Euro FX Currency Futures                                                   1,550        206,800,001     $ 205,617,187       12/18/2023 $ (1,182,814)
+MSCI EAFE Index Futures                                                      781         81,639,619        79,720,575       12/15/2023   (1,919,044)
+S&P 500 E-Mini Index Futures                                                  82         18,443,405        17,734,550       12/15/2023    (708,855)
+WTI Crude Futures (b)                                                      1,885        166,280,134       167,388,000       12/20/2023    1,107,866
+     Total Long                                                                                                                        $ (2,702,847)
+Futures Contracts - Short
+3 Months SOFR Futures                                                      (1,949)      (466,909,970) $(466,273,888)         3/17/2025 $ 636,082
+30 Day Federal Funds Futures                                                 (457)      (180,061,082) (180,100,970)          1/31/2024     (39,888)
+Gold 100 Oz Futures (b)                                                      (737)      (143,561,989) (137,531,570)         12/27/2023   6,030,419
+Japanese Yen Currency Futures                                              (4,546)      (390,841,923) (385,131,437)         12/18/2023   5,710,486
+MSCI Emerging Market Index                                                   (636)       (31,140,100)   (30,384,900)        12/15/2023     755,200
+U.S. Treasury 10-Year Note Futures                                         (1,743)      (192,315,242) (188,352,938)         12/19/2023   3,962,304
+U.S. Treasury 10-Year Ultra Note Futures                                   (1,671)      (192,304,074) (186,420,937)         12/19/2023   5,883,137
+U.S. Treasury 2-Year Note Futures                                          (2,305)      (468,893,287) (467,248,712)         12/29/2023   1,644,575
+U.S. Treasury Long Bond Futures                                              (705)       (84,043,406)   (80,215,781)        12/19/2023   3,827,625
+U.S. Treasury Ultra-Long Bond Futures                                        (657)       (82,708,460)   (77,977,687)        12/19/2023   4,730,773
+     Total Short                                                                                                                       $33,140,713
+          Total Futures Contracts                                                                                                      $30,437,866
+
+(a)   Societe Generale is the counterparty for all Open Futures Contracts held by the Fund and the iMGP DBi Cayman Managed Futures
+      Subsidiary at September 30, 2023.
+(b)   Contract held by the iMGP DBi Cayman Managed Futures Subsidiary.
+

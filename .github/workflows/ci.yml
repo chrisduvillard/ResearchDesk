@@ -1,0 +1,146 @@
+name: Checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Linux Docker tests and dashboard smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install and test browser assets
+        run: |
+          npm ci --ignore-scripts
+          npm run vendor
+          npm test
+      - name: Validate default Compose configuration
+        run: docker compose --env-file .env.example config --quiet
+      - name: Build the distributable image
+        run: docker build -t research-desk:ci .
+      - name: Run Python regressions without network access
+        run: >-
+          docker run --rm --network none --read-only
+          --tmpfs /tmp:rw --tmpfs /data:rw,uid=1000,gid=1000
+          research-desk:ci python -m pytest -q -p no:cacheprovider
+          -W error::starlette.exceptions.StarletteDeprecationWarning
+      - name: Verify a fresh dashboard and bundled assets
+        run: |
+          docker run -d --name research-desk-ci --read-only \
+            --tmpfs /tmp:rw --tmpfs /data:rw,uid=1000,gid=1000 \
+            -p 127.0.0.1:18765:8000 research-desk:ci
+          curl --fail --retry 15 --retry-connrefused --retry-delay 1 http://127.0.0.1:18765/health
+          for route in / /dbmf /docs /openapi.json /api/positions /api/dbmf/status /static/vendor/lightweight-charts.js /static/vendor/swagger/swagger-ui-bundle.js; do
+            curl --fail --silent --show-error --output /dev/null "http://127.0.0.1:18765$route"
+          done
+      - name: Show server logs and clean up
+        if: always()
+        run: |
+          docker logs research-desk-ci 2>/dev/null || true
+          docker rm -f research-desk-ci 2>/dev/null || true
+
+  macos:
+    name: macOS native tests and dashboard smoke test
+    runs-on: macos-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements.lock
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Check macOS file setup commands
+        run: |
+          cp .env.example .env
+          printf 'APP_UID=%s\nAPP_GID=%s\n' "$(id -u)" "$(id -g)" >> .env
+          mkdir -p data
+          test -w data
+          grep -qx "APP_UID=$(id -u)" .env
+          grep -qx "APP_GID=$(id -g)" .env
+      - name: Install locked dependencies and test browser assets
+        run: |
+          python -m pip install -r requirements.lock
+          python -m pip check
+          npm ci --ignore-scripts
+          npm run vendor
+          npm test
+      - name: Run native Python regressions
+        run: python -m pytest -q -W error::starlette.exceptions.StarletteDeprecationWarning
+      - name: Verify a fresh native dashboard and bundled assets
+        env:
+          DATA_DIR: ${{ runner.temp }}/research-desk-data
+        run: |
+          python -m uvicorn tracker.api:app --host 127.0.0.1 --port 18765 > "$RUNNER_TEMP/research-desk.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true; cat "$RUNNER_TEMP/research-desk.log"' EXIT
+          curl --fail --retry 15 --retry-connrefused --retry-delay 1 http://127.0.0.1:18765/health
+          for route in / /dbmf /docs /openapi.json /api/positions /api/dbmf/status /static/vendor/lightweight-charts.js /static/vendor/swagger/swagger-ui-bundle.js; do
+            curl --fail --silent --show-error --output /dev/null "http://127.0.0.1:18765$route"
+          done
+
+  windows-setup:
+    name: Windows PowerShell setup, Compose config, and JavaScript tests
+    # Hosted Windows uses Windows containers; this validates client-side setup,
+    # not Docker Desktop / WSL 2 execution of the Linux application image.
+    runs-on: windows-2022
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Check Windows file setup commands and resolved Compose configuration
+        run: |
+          Copy-Item .env.example .env
+          New-Item -ItemType Directory -Force data
+          if (!(Test-Path data -PathType Container)) { throw 'Data directory was not created' }
+          if ((Get-FileHash .env).Hash -ne (Get-FileHash .env.example).Hash) { throw '.env copy differs' }
+          docker compose version
+          if ($LASTEXITCODE -ne 0) { throw 'Docker Compose is unavailable' }
+          $configJson = docker compose config --format json
+          if ($LASTEXITCODE -ne 0) { throw 'Compose configuration is invalid' }
+          $config = ($configJson -join "`n") | ConvertFrom-Json
+          $serviceNames = @($config.services.PSObject.Properties.Name | Sort-Object)
+          if (($serviceNames -join ',') -ne 'collector,dbmf-collector,web') { throw 'Unexpected services' }
+          foreach ($name in $serviceNames) {
+            $service = $config.services.$name
+            if (!$service.read_only -or $service.user -ne '1000:1000') { throw "Invalid defaults for $name" }
+            $volume = @($service.volumes | Where-Object target -eq '/data')
+            if ($volume.Count -ne 1 -or $volume[0].type -ne 'bind') { throw "Missing data bind for $name" }
+            if ([IO.Path]::GetFullPath($volume[0].source) -ne (Join-Path $PWD.Path 'data')) { throw "Wrong data path for $name" }
+            if ($volume[0].bind.create_host_path) { throw "Compose must require the data directory for $name" }
+          }
+          $port = @($config.services.web.ports)
+          if ($port.Count -ne 1 -or $port[0].host_ip -ne '127.0.0.1' -or $port[0].published -ne '8765') {
+            throw 'Dashboard must bind to localhost:8765'
+          }
+      - name: Install and test browser assets on Windows
+        run: |
+          npm ci --ignore-scripts
+          if ($LASTEXITCODE -ne 0) { throw 'npm install failed' }
+          npm run vendor
+          if ($LASTEXITCODE -ne 0) { throw 'Asset vendoring failed' }
+          npm test
+          if ($LASTEXITCODE -ne 0) { throw 'JavaScript tests failed' }
+      - name: Check Windows PowerShell 5.1 backup export with stubbed Docker
+        shell: powershell
+        run: ./tests/test_backup_export.ps1

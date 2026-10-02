@@ -1,0 +1,80 @@
+iMGP DBi Managed Futures Strategy ETF
+CONSOLIDATED SCHEDULE OF INVESTMENTS IN SECURITIES at September 30, 2024 (Unaudited)
+
+    Principal
+    Amount^                                               Value
+SHORT-TERM INVESTMENTS: 77.1%
+REPURCHASE AGREEMENTS: 1.8%
+$17,343,612       Fixed Income Clearing Corp.
+                  1.520%, 9/30/2024, due
+                  10/01/2024 [collateral: par
+                  value $17,030,700, U.S.
+                  Treasury Note, 4.875%, due
+                  04/30/2026, value
+                  $17,692,889] (proceeds
+                  $17,344,345)                        $ 17,343,612
+TOTAL REPURCHASE AGREEMENTS
+  (Cost $17,343,612)                                    17,343,612
+TREASURY BILLS: 75.3%
+              U.S. Treasury Bills
+742,000,000       4.523%, 10/08/2024(a)(b)(c)          741,325,322
+TOTAL TREASURY BILLS
+  (Cost $741,254,183)                                  741,325,322
+TOTAL SHORT-TERM INVESTMENTS
+  (Cost $758,597,795)                                  758,668,934
+TOTAL INVESTMENTS
+(Cost: $758,597,795): 77.1%                            758,668,934
+Other Assets in Excess of Liabilities: 22.9%           225,565,007
+NET ASSETS: 100.0%                                    $984,233,941
+
+Percentages are stated as a percent of net assets.
+^       The principal amount is stated in U.S. Dollars unless
+        otherwise indicated.
+(a)     The rate shown represents yield-to-maturity.
+(b)     All or a portion of this security is held by the iMGP DBi
+        Cayman Managed Futures Subsidiary.
+(c)     Issued with a zero coupon. Income is recognized through
+        the accretion of discount.
+
+The cost basis of investments for federal income tax purposes at
+September 30, 2024 was as follows*:
+
+Cost of investments                                  $758,597,795
+Gross unrealized appreciation                          24,507,153
+Gross unrealized depreciation                          (5,310,543)
+Net unrealized appreciation                          $ 19,196,610
+
+* Because tax adjustments are calculated annually, the above
+  table does not reflect tax adjustments. For the previous fiscal
+  year’s federal income tax information, please refer to the Notes
+  to Financial Statements section in the Fund’s most recent semi-
+  annual or annual report.
+iMGP DBi Managed Futures Strategy ETF
+
+CONSOLIDATED SCHEDULE OF INVESTMENTS IN FUTURES CONTRACTS AT September 30, 2024 (Unaudited)(a)
+
+                                                                                                                           Unrealized
+                                                             Number of                                      Expiration   Appreciation/
+Description                                                  Contracts   Notional Amount   Notional Value     Date       (Depreciation)
+Futures Contracts - Long
+Gold 100 Oz Futures (b)                                            596   $ 149,002,659     $ 158,500,240    12/27/2024 $ 9,497,581
+Japanese Yen Currency Futures                                      996      87,662,709        87,529,725    12/16/2024    (132,984)
+MSCI EAFE Index Futures                                          1,418     173,521,916       176,385,020    12/20/2024   2,863,104
+MSCI Emerging Market Index                                       2,195     125,940,725       128,703,825    12/20/2024   2,763,100
+S&P 500 E-Mini Index Futures                                       843     238,595,755       245,070,638    12/20/2024   6,474,883
+U.S. Treasury 10-Year Note Futures                               4,969     571,358,573       567,863,531    12/19/2024 (3,495,042)
+U.S. Treasury 2-Year Note Futures                                4,566     952,338,078       950,833,830    12/31/2024 (1,504,248)
+U.S. Treasury Long Bond Futures                                  1,427     177,155,954       177,215,563    12/19/2024      59,609
+     Total Long                                                                                                        $16,526,003
+Futures Contracts - Short
+Euro FX Currency Futures                                          (788) $(109,862,533) $(109,990,025) 12/16/2024 $ (127,492)
+Gold 100 Oz Futures (b)                                            (72)   (19,096,903)   (19,147,680) 12/27/2024     (50,777)
+Japanese Yen Currency Futures                                   (2,397) (213,409,435) (210,651,356) 12/16/2024     2,758,079
+S&P 500 E-Mini Index Futures                                       (40)   (11,633,762)   (11,628,500) 12/20/2024       5,262
+WTI Crude Futures (b)                                             (473)   (32,069,606)   (32,055,210) 11/20/2024      14,396
+     Total Short                                                                                                 $ 2,599,468
+          Total Futures Contracts                                                                                $19,125,471
+
+(a)   Societe Generale is the counterparty for all Open Futures Contracts held by the Fund and the iMGP DBi Cayman Managed Futures
+      Subsidiary at September 30, 2024.
+(b)   Contract held by the iMGP DBi Cayman Managed Futures Subsidiary.

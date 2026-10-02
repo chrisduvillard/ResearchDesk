@@ -1,0 +1,13 @@
+.venv
+.git
+.pytest_cache
+**/__pycache__
+node_modules
+data
+.env
+.env.*
+tmp
+
+# Temporary backup restoration candidates
+restore-inbox/
+data-before-restore*/

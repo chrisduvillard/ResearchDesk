@@ -1,0 +1,64 @@
+name: dan-nathan
+x-common: &common
+  build: .
+  image: dan-nathan-tracker:1.5.1
+  restart: unless-stopped
+  user: "${APP_UID:-1000}:${APP_GID:-1000}"
+  init: true
+  environment:
+    DATA_DIR: /data
+    TZ: ${APP_TIMEZONE:-UTC}
+    XDG_CACHE_HOME: /data/cache
+  volumes:
+    - type: bind
+      source: ${HOST_DATA_DIR:-./data}
+      target: /data
+      bind:
+        create_host_path: false
+  read_only: true
+  tmpfs:
+    - /tmp:size=128m
+  cap_drop:
+    - ALL
+  security_opt:
+    - no-new-privileges:true
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+services:
+  web:
+    <<: *common
+    ports:
+      - "127.0.0.1:${APP_PORT:-8765}:8000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)",
+        ]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+  collector:
+    <<: *common
+    command: ["python", "-m", "tracker.cli", "worker"]
+    healthcheck:
+      test: ["CMD", "python", "-m", "tracker.cli", "worker-health"]
+      interval: 60s
+      timeout: 15s
+      start_period: 300s
+      retries: 3
+  dbmf-collector:
+    <<: *common
+    command: ["python", "-m", "tracker.cli", "dbmf-worker"]
+    healthcheck:
+      test: ["CMD", "python", "-m", "tracker.cli", "dbmf-health"]
+      interval: 60s
+      timeout: 15s
+      start_period: 300s
+      retries: 3

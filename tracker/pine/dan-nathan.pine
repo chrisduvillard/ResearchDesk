@@ -1,0 +1,117 @@
+//@version=6
+indicator("Dan Nathan · Disclosed Positions", overlay = true, max_labels_count = 500)
+
+string payload = input.text_area("", "Paste the company/fund export from your dashboard")
+bool showShading = input.bool(true, "Shade disclosed direction")
+bool showBaseline = input.bool(true, "Show tracking baseline")
+bool showLabels = input.bool(true, "Show event labels")
+
+color bull = color.rgb(34, 132, 104)
+color bear = color.rgb(193, 78, 79)
+color movement = color.rgb(112, 123, 172)
+color rangeColor = color.rgb(165, 132, 78)
+color neutral = color.rgb(118, 123, 132)
+var array<int> dates = array.new_int()
+var array<string> kinds = array.new_string()
+var array<string> directions = array.new_string()
+var array<string> tooltips = array.new_string()
+var string company = ""
+var string exportedAt = ""
+var string sourceAsOf = ""
+var string coverage = ""
+var string currentDirection = "unknown"
+var int cursor = 0
+var table status = table.new(position.bottom_left, 1, 5, bgcolor = color.new(color.black, 18), border_width = 1)
+
+f_color(string direction) =>
+    direction == "bullish" ? bull : direction == "bearish" ? bear : direction == "large_move" ? movement : direction == "range_bound" ? rangeColor : neutral
+
+f_direction(string direction) =>
+    switch direction
+        "bullish" => "bullish"
+        "bearish" => "bearish"
+        "large_move" => "benefits from large moves"
+        "range_bound" => "benefits from a price range"
+        "conditional" => "conditional exposure"
+        "mixed" => "mixed exposure"
+        "unknown" => "needs more detail"
+        => "no simple direction"
+
+f_title(string kind, string direction) =>
+    switch kind
+        "baseline" => "Tracking baseline · " + f_direction(direction)
+        "added" => "Newly disclosed · " + f_direction(direction)
+        "removed" => "No longer disclosed"
+        "direction_changed" => "Disclosed direction · " + f_direction(direction)
+        "strategy_changed" => "Strategy updated · " + f_direction(direction)
+        "correction" => "Interpretation corrected · " + f_direction(direction)
+        => "Disclosure update"
+
+if not (timeframe.isdaily and timeframe.multiplier == 1)
+    runtime.error("Use this indicator on a 1-day chart.")
+
+if barstate.isfirst and str.length(str.trim(payload)) > 0
+    array<string> lines = str.split(str.trim(payload), "\n")
+    array<string> header = str.split(array.get(lines, 0), "|")
+    if array.size(header) != 8
+        runtime.error("Invalid export header. Copy a fresh export from the dashboard.")
+    if array.get(header, 0) != "DN1" and array.get(header, 0) != "DN2"
+        runtime.error("Unsupported export version.")
+    company := array.get(header, 2)
+    exportedAt := array.get(header, 3)
+    sourceAsOf := array.get(header, 4)
+    coverage := array.get(header, 6) + " of " + array.get(header, 5) + " events · from " + array.get(header, 7)
+    string expectedSymbol = array.get(header, 1)
+    array<string> symbolParts = str.split(expectedSymbol, ":")
+    bool alternateUSFeed = false
+    if array.size(symbolParts) == 2
+        string listing = array.get(symbolParts, 0)
+        bool usListing = listing == "NASDAQ" or listing == "NYSE" or listing == "AMEX" or listing == "CBOE"
+        // TradingView may supply a listed US stock through its Cboe One (BATS) feed.
+        alternateUSFeed := usListing and ticker.standard(syminfo.tickerid) == "BATS:" + array.get(symbolParts, 1)
+    if ticker.standard(syminfo.tickerid) != expectedSymbol and not alternateUSFeed
+        runtime.error("This export is for " + company + " (" + array.get(header, 1) + "). Switch charts or paste the matching export.")
+    if array.size(lines) > 401
+        runtime.error("Too many events. Copy a bounded export from the dashboard.")
+    if array.size(lines) > 1
+        for i = 1 to array.size(lines) - 1
+            array<string> fields = str.split(str.trim(array.get(lines, i)), "|")
+            if array.size(fields) != 6
+                runtime.error("Malformed event on export line " + str.tostring(i + 1))
+            float parsedDate = str.tonumber(array.get(fields, 0))
+            if na(parsedDate) or parsedDate < 20000101 or parsedDate > 21001231
+                runtime.error("Invalid event date on export line " + str.tostring(i + 1))
+            int eventDate = int(parsedDate)
+            if array.size(dates) > 0
+                if eventDate < array.get(dates, array.size(dates) - 1)
+                    runtime.error("Events must be in chronological order.")
+            string direction = array.get(fields, 2)
+            if direction != "bullish" and direction != "bearish" and direction != "mixed" and direction != "unknown" and direction != "non_directional" and direction != "large_move" and direction != "range_bound" and direction != "conditional"
+                runtime.error("Unrecognized direction in export.")
+            array.push(dates, eventDate)
+            array.push(kinds, array.get(fields, 1))
+            array.push(directions, direction)
+            array.push(tooltips, company + "\n" + array.get(fields, 5) + "\nSource as of (UTC): " + array.get(fields, 3) + "\nFirst observed (UTC): " + array.get(fields, 4) + "\nObservation dates do not establish actual trade dates. A removal means the position is no longer listed.")
+
+int barDate = year * 10000 + month * 100 + dayofmonth
+while cursor < array.size(dates)
+    int eventDate = array.get(dates, cursor)
+    if eventDate > barDate
+        break
+    string direction = array.get(directions, cursor)
+    string kind = array.get(kinds, cursor)
+    currentDirection := direction
+    if eventDate == barDate and showLabels and (showBaseline or kind != "baseline")
+        bool down = direction == "bearish"
+        label.new(bar_index, down ? high : low, f_title(kind, direction) + "\n" + company, yloc = down ? yloc.abovebar : yloc.belowbar, style = down ? label.style_label_down : label.style_label_up, color = kind == "baseline" or kind == "removed" ? neutral : f_color(direction), textcolor = color.white, size = size.small, tooltip = array.get(tooltips, cursor))
+    cursor += 1
+
+bgcolor(showShading and currentDirection != "unknown" ? color.new(f_color(currentDirection), 92) : na, title = "Disclosed exposure")
+
+if barstate.islast
+    bool empty = str.length(str.trim(payload)) == 0
+    table.cell(status, 0, 0, empty ? "Dan Nathan · paste a dashboard export" : company, text_color = color.white, text_size = size.small)
+    table.cell(status, 0, 1, empty ? "Indicator settings → Inputs" : "Disclosed: " + f_direction(currentDirection) + " · source " + sourceAsOf, text_color = color.white, text_size = size.tiny)
+    table.cell(status, 0, 2, empty ? "Export data updates by manual paste" : "Exported " + exportedAt, text_color = color.silver, text_size = size.tiny)
+    table.cell(status, 0, 3, coverage, text_color = color.silver, text_size = size.tiny)
+    table.cell(status, 0, 4, "First observed ≠ actual entry · sizing and hedges unknown", text_color = color.silver, text_size = size.tiny)
