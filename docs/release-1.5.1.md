@@ -17,7 +17,9 @@ Local Python tests: **316 passed**, with no test-client deprecation warning. Jav
 
 The independent repository is [chrisduvillard/ResearchDesk](https://github.com/chrisduvillard/ResearchDesk). It starts with a fresh source snapshot and contains none of the old repository’s Git objects. The original DanNathan repository stays private because its previously documented cached-object privacy issue is not proven removed.
 
-Hosted CI, final deployment, and publication results will be recorded here after verification.
+**Published and deployed on 2 October 2026.** All three [hosted CI jobs passed](https://github.com/chrisduvillard/ResearchDesk/actions/runs/37035955840): Linux Docker tests/startup, macOS native tests/startup, and Windows PowerShell 5.1 setup/Compose/JavaScript/backup checks. The live 1.5.1 installation has three healthy services and no reported data-health issues. A post-upgrade backup verified SQLite integrity, foreign keys, six CNBC snapshots, 20 DBMF reports, and 25 acquisition records. Before/after backups and the prior image were preserved for rollback.
+
+The new repository is public. The original repository remains private. The fresh source history passed Gitleaks, uses the author’s GitHub noreply address, and was created independently rather than as a fork.
 
 ## Remaining follow-ups
 
