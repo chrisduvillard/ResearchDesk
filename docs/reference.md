@@ -48,7 +48,13 @@ Set `BROWSER_EXECUTABLE` if using an existing Chromium executable. Browser journ
 
 The October 3, 2026 implementation checkpoint passed 362 Python tests locally and in a network-disabled Linux container, four opt-in browser journeys, and fourteen JavaScript tests. A separate Compose rehearsal completed migration and brought all four services healthy. The synthetic dataset held 65,200 research events and 260,800 holdings; the slowest measured read was 0.111 seconds. The production service was not upgraded during these checks.
 
-Linux Docker build/runtime checks are executable on the host. Native macOS, Windows Docker Desktop setup, laptop access, and multi-day source qualification are external release checks and must be recorded independently; a Linux CI pass does not certify them. WTMF automation remains blocked. No full-program completion claim is appropriate until all promised sources qualify and the rollout checks pass.
+The expansion was subsequently deployed after quiescing the old writers, preserving the previous image and complete data directory, verifying a fresh backup (7 snapshots, 20 DBMF reports, 26 observations), and rehearsing migration with unchanged legacy evidence. All four services passed health checks. Owner login, Secure/HttpOnly/SameSite cookies, editing access, and logout passed through private HTTPS. The owner confirmed the Today page loaded from the laptop.
+
+[Cross-platform CI](https://github.com/chrisduvillard/ResearchDesk/actions/runs/37103206283) passed Linux Docker tests, native macOS tests and dashboard checks, and Windows PowerShell setup/Compose/JavaScript checks. Windows CI validates installation commands and configuration, not a Windows Docker Desktop GUI installation. Subsequent live-provider regressions passed 366 Python tests and four browser journeys.
+
+KMLM collateral uses its dated published NAV for calculated ratios; issuer-supplied weights are retained separately and checked against a consistent denominator across the complete collateral basket. The NAV date must match the holdings date. CTA validates Total MV against Official NAV × Shares Out, and validates issuer weights against BNY Projected NAV × Shares Out. Soybean oil has a distinct market identity from soybeans. Rejected downloads are archived before parsing.
+
+WTMF remains unavailable after a fresh official request returned HTTP 403. Supported fund collectors now run unattended in observation mode. Qualification still requires five genuine scheduled successes across two distinct source dates; manual checks do not count. No full-program completion claim is appropriate while that gate and WTMF automation remain open.
 
 ## Open the dashboard
 

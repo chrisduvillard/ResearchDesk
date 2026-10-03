@@ -226,3 +226,84 @@ def test_complete_removal_is_zero_not_missing(database):
         "market:gold"
     ]
     assert cell == {"value": 0, "change_pp": -10}
+
+
+def test_cta_soybean_oil_is_distinct_from_soybeans():
+    from tracker.funds import parse_cta
+
+    doc = parse_cta(
+        (FIX / "cta-2026-10-02.xlsx").read_bytes(), expected_date="2026-10-02"
+    )
+    oil = [r for r in doc["holdings"] if r["asset_id"] == "market:soybean-oil"]
+    assert {r["measure"] for r in oil} >= {"notional_pct_nav", "issuer_risk_weight_pct"}
+    assert all(r["asset_id"] != "market:soybeans" for r in oil)
+
+
+def test_kmlm_reported_weights_remain_separate_from_published_nav():
+    from tracker.funds import parse_kmlm
+
+    raw = (FIX / "kmlm-2026-10-02.csv").read_bytes()
+    doc = parse_kmlm(
+        raw, net_assets="560096908", expected_date="2026-10-02", expected_rows=32
+    )
+    cash = next(
+        h
+        for h in doc["holdings"]
+        if h["name"] == "Cash" and h["measure"] == "collateral_pct_nav"
+    )
+    issuer = next(
+        h
+        for h in doc["holdings"]
+        if h["name"] == "Cash" and h["measure"] == "issuer_portfolio_weight_pct"
+    )
+    assert float(cash["value"]) == pytest.approx(184245603 / 560096908 * 100)
+    assert float(issuer["value"]) == 32.62
+    with pytest.raises(ValueError):
+        parse_kmlm(
+            raw.replace(b"Cash,32.62", b"Cash,3.262"),
+            net_assets="560096908",
+            expected_date="2026-10-02",
+            expected_rows=32,
+        )
+
+
+def test_kmlm_requires_nav_date_to_match_holdings(database):
+    from tracker.sources import fetch_fund
+
+    page = (
+        "<p>Fund Details Data as of 10/02/2026 Net Assets $562,525,502</p>"
+        '<a href="https://kraneshares.com/csv/10_01_2026_kmlm_holdings.csv">CSV</a>'
+        "<table><tr><th>Notional Value($)</th></tr>"
+        + "".join(f"<tr><td>{i}</td></tr>" for i in range(1, 33))
+        + "</table>"
+    ).encode()
+    source = {
+        "fund_id": "KMLM",
+        "url": "https://kraneshares.com/etf/kmlm/",
+        "adapter": "kmlm",
+    }
+    with pytest.raises(ValueError, match="NAV.*date"):
+        fetch_fund(
+            source,
+            lambda url: (FIX / "kmlm.csv").read_bytes() if ".csv" in url else page,
+        )
+
+
+def test_rejected_workbook_remains_archived(database):
+    import gzip, hashlib
+    from zipfile import BadZipFile
+    from tracker.sources import fetch_fund
+
+    raw = b"broken workbook download"
+    page = b'<a href="https://www.simplify.us/sites/default/files/excel_holdings/2026_10_02_Simplify_Portfolio_EOD_Tracker.xlsx">Holdings</a>'
+    with pytest.raises(BadZipFile):
+        fetch_fund(
+            {
+                "fund_id": "CTA",
+                "url": "https://www.simplify.us/etfs/cta",
+                "adapter": "cta",
+            },
+            lambda url: raw if ".xlsx" in url else page,
+        )
+    path = db.DATA_DIR / "funds" / (hashlib.sha256(raw).hexdigest() + ".gz")
+    assert path.exists() and gzip.decompress(path.read_bytes()) == raw

@@ -13,7 +13,7 @@ from . import db
 from .research import archive_bytes, activity
 from .dbmf.markets import normalize_name, identify, EXPIRY, UnknownInstrument
 
-VERSION = "funds-1"
+VERSION = "funds-2"
 # Explicit aliases, never fuzzy matches. Contracts retain their own instrument_key.
 ALIASES = {
     "BRENT CRUDE FUTR": "brent",
@@ -27,6 +27,7 @@ ALIASES = {
     "US 10YR ULTRA FUT": "us10ultra",
     "SUGAR #11 (WORLD)": "sugar",
     "SOYBEAN FUTURE": "soybeans",
+    "SOYBEAN OIL FUTR": "soybean-oil",
     "NATURAL GAS FUTR": "natural-gas",
     "LONG GILT FUTURE": "uk10y",
     "JPN 10Y BOND(OSE)": "jp10y",
@@ -135,7 +136,31 @@ def parse_kmlm(raw, *, net_assets, expected_date, expected_rows=None):
     ):
         raise ValueError("KMLM missing or duplicate ranks")
     holdings = []
-    collateral = Decimal(0)
+    collateral = sum(
+        (
+            number(r["Market Value($)"])
+            for r in records
+            if r["Type"] in ("Cash", "Currency", "Treasury Bill")
+        ),
+        Decimal(0),
+    )
+    if collateral <= 0:
+        raise ValueError("KMLM collateral total must be positive")
+    collateral_rows = [
+        r for r in records if r["Type"] in ("Cash", "Currency", "Treasury Bill")
+    ]
+    if not any(
+        all(
+            abs(
+                number(r["% of Net Assets"])
+                - number(r["Market Value($)"]) / basis * 100
+            )
+            <= Decimal(".02")
+            for r in collateral_rows
+        )
+        for basis in (nav, collateral)
+    ):
+        raise ValueError("KMLM reported collateral weight mismatch")
     for r in records:
         name = r["Company Name"]
         kind = r["Type"]
@@ -161,9 +186,9 @@ def parse_kmlm(raw, *, net_assets, expected_date, expected_rows=None):
         elif kind in ("Cash", "Currency", "Treasury Bill"):
             value = number(r["% of Net Assets"])
             mv = number(r["Market Value($)"])
-            if abs(value - mv / nav * 100) > Decimal(".02"):
-                raise ValueError("KMLM collateral unit mismatch")
-            collateral += mv
+            # The issuer's displayed weights can use a denominator different
+            # from its dated NAV. Validate those weights against the complete
+            # collateral basket; retain them separately from calculated NAV ratios.
             asset = (
                 "market:tbills"
                 if kind == "Treasury Bill"
@@ -177,12 +202,22 @@ def parse_kmlm(raw, *, net_assets, expected_date, expected_rows=None):
                     r["Identifier"] + ":" + name,
                     asset,
                     "collateral_pct_nav",
-                    value,
+                    mv / nav * 100,
                     q,
                     mv,
                     None,
                     "USD",
                     json.dumps(r),
+                )
+            )
+            holdings.append(
+                holding(
+                    name,
+                    r["Identifier"] + ":" + name,
+                    asset,
+                    "issuer_portfolio_weight_pct",
+                    value,
+                    evidence=json.dumps(r),
                 )
             )
         else:
@@ -193,7 +228,12 @@ def parse_kmlm(raw, *, net_assets, expected_date, expected_rows=None):
         source_date=expected_date,
         complete=True,
         holdings=holdings,
-        metadata={"net_assets": str(nav), "rows": len(records)},
+        metadata={
+            "net_assets": str(nav),
+            "rows": len(records),
+            "collateral_market_value": str(collateral),
+            "reported_weight_basis": "Issuer weights retained separately; calculated exposures use the published dated NAV",
+        },
     )
 
 
@@ -225,7 +265,14 @@ def parse_cta(raw, *, expected_date):
             value = number(r["Weight"]) * 100
             exposure = number(r["Market Value/Exposure"])
             q = number(r["Quantity"])
-            if nav <= 0 or abs(value - exposure / nav * 100) > Decimal(".15"):
+            official_total = number(r["Official NAV"]) * number(r["Shares Out"])
+            projected_total = number(r["BNY Projected NAV"]) * number(r["Shares Out"])
+            if (
+                nav <= 0
+                or projected_total <= 0
+                or abs(nav - official_total) > Decimal(".01")
+                or abs(value - exposure / projected_total * 100) > Decimal(".00001")
+            ):
                 raise ValueError("CTA inconsistent units/NAV")
             reported_weight = value
             value = exposure / nav * 100
@@ -330,6 +377,7 @@ def parse_cta(raw, *, expected_date):
             holdings=holdings,
             metadata={
                 "net_assets": str(nav),
+                "reported_weight_basis": "BNY Projected NAV times Shares Out; computed notional/NAV uses Official NAV times Shares Out",
                 "risk_basis": "Issuer weights: 10-year equivalents for interest-rate and bond futures",
             },
         )

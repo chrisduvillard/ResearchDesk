@@ -81,6 +81,7 @@ def fetch_fund(source, fetch):
         if not match:
             raise ValueError("CTA reporting date missing from workbook link")
         raw = fetch(url)
+        archive_bytes(raw, "funds")
         return parse_cta(raw, expected_date="-".join(match.groups())), raw, url
     if fund == "KMLM":
         links = {
@@ -92,9 +93,17 @@ def fetch_fund(source, fetch):
             raise ValueError("KMLM official CSV link missing or ambiguous")
         url = official_link(links.pop(), {"kraneshares.com", "www.kraneshares.com"})
         match = re.search(r"(\d{2})_(\d{2})_(\d{4})_kmlm", url)
-        nav = re.search(r"Net Assets\s*\$([\d,]+)", soup.get_text(" ", strip=True))
+        nav = re.search(
+            r"Fund Details\s+Data as of\s+(\d{2}/\d{2}/\d{4}).*?Net Assets\s*\$([\d,]+)",
+            soup.get_text(" ", strip=True),
+        )
         if not match or not nav:
             raise ValueError("KMLM NAV or source date missing")
+        if (
+            datetime.strptime(nav[1], "%m/%d/%Y").date().isoformat()
+            != f"{match[3]}-{match[1]}-{match[2]}"
+        ):
+            raise ValueError("KMLM NAV and holdings dates differ")
         # The page full holdings table independently checks CSV completeness.
         table = next(
             (t for t in soup.find_all("table") if "Notional Value($)" in t.get_text()),
@@ -108,10 +117,11 @@ def fetch_fund(source, fetch):
             if tr.find(["td", "th"])
         )
         raw = fetch(url)
+        archive_bytes(raw, "funds")
         return (
             parse_kmlm(
                 raw,
-                net_assets=nav[1],
+                net_assets=nav[2],
                 expected_date=f"{match[3]}-{match[1]}-{match[2]}",
                 expected_rows=count,
             ),
@@ -144,6 +154,7 @@ def fetch_fund(source, fetch):
             raise ValueError("ARK full holdings CSV missing or ambiguous")
         url = official_link(links.pop(), {"assets.ark-funds.com"})
         raw = fetch(url)
+        archive_bytes(raw, "funds")
         return parse_ark(raw, fund), raw, url
     raise ValueError("No qualified official adapter")
 
