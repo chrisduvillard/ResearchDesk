@@ -1,0 +1,63 @@
+/* Scoped so the detailed chart and table layouts keep their original styling. */
+#desk-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  padding: 12px 4vw;
+  background: #fafaf6;
+  border-bottom: 1px solid #e5e8df;
+  overflow: visible;
+  font: 13px/1.4 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+#desk-navigation .desk-nav-primary,
+#desk-navigation .desk-nav-tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  min-width: 0;
+}
+#desk-navigation a {
+  padding: 8px 0;
+  color: #52614f;
+  text-decoration: none;
+  white-space: nowrap;
+  font-size: 13px;
+}
+#desk-navigation a:hover { color: #26765a; text-decoration: underline; }
+#desk-navigation a[aria-current="page"] { color: #254b34; font-weight: 700; }
+#desk-navigation .desk-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  color: #52614f;
+  font-size: 11px;
+  font-weight: 600;
+  min-width: 0;
+}
+#desk-navigation select {
+  display: block;
+  width: 180px;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 40px;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid #c7d1bf;
+  border-radius: 6px;
+  background: #fff;
+  color: #202a25;
+  font: 500 14px/1.4 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+#desk-navigation a:focus-visible,
+#desk-navigation select:focus-visible { outline: 3px solid #a77c25; outline-offset: 3px; }
+@media (max-width: 600px) {
+  #desk-navigation { padding: 12px 18px; gap: 12px; }
+  #desk-navigation .desk-nav-primary { display: grid; grid-template-columns: 1fr 1fr; width: 100%; gap: 10px; }
+  #desk-navigation .desk-home { grid-column: 1 / -1; padding: 0; }
+  #desk-navigation select { width: 100%; }
+  #desk-navigation .desk-nav-tools { gap: 4px 16px; }
+}

@@ -5,6 +5,7 @@ Playwright Chromium. Test data and the web server are isolated from production.
 """
 
 import os
+import re
 import secrets
 import socket
 import subprocess
@@ -195,6 +196,44 @@ def test_legacy_bookmark_redirect(browser_app):
     page.goto(origin + "/?page=history&range=12#history")
     page.wait_for_url("**/dan?**")
     assert "/dan?" in page.url and "page=history" in page.url and "range=12" in page.url
+
+
+def test_shared_fund_and_contributor_switchers(browser_app):
+    from playwright.sync_api import expect
+
+    context, origin, _ = browser_app
+    page = context.new_page()
+    errors = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.goto(origin)
+    page.get_by_label("Fund", exact=True).select_option("DBMF")
+    page.wait_for_url(re.compile(r"/dbmf(?:\?|$)"))
+    expect(page.get_by_role("heading", name="Current positioning")).to_be_visible()
+    expect(page.get_by_label("Fund", exact=True)).to_have_value("DBMF")
+    page.get_by_label("Fund", exact=True).select_option("KMLM")
+    expect(page.get_by_role("heading", name="KMLM holdings")).to_be_visible()
+    expect(page.get_by_label("Fund", exact=True)).to_have_value("KMLM")
+    page.go_back()
+    expect(page.get_by_label("Fund", exact=True)).to_have_value("DBMF")
+    page.get_by_label("CNBC contributor", exact=True).select_option("dan-nathan")
+    page.wait_for_url(re.compile(r"/dan(?:\?|$)"))
+    expect(page.get_by_role("heading", name="Dan Nathan’s positions")).to_be_visible()
+    page.get_by_label("CNBC contributor", exact=True).select_option("karen-finerman")
+    expect(page.get_by_role("heading", name="Karen Finerman", exact=True)).to_be_visible()
+    expect(page.get_by_label("CNBC contributor", exact=True)).to_have_value("karen-finerman")
+    page.get_by_role("link", name="Compare funds", exact=True).click()
+    expect(page.get_by_role("heading", name="Fund positioning")).to_be_visible()
+    page.go_back()
+    expect(page.get_by_label("CNBC contributor", exact=True)).to_have_value("karen-finerman")
+    page.goto(origin + "/research?view=funds&fund=DBMF")
+    page.wait_for_url(re.compile(r"/dbmf(?:\?|$)"))
+    for path in ["/", "/dan", "/dbmf", "/research?view=funds&fund=ARKK"]:
+        page.set_viewport_size({"width": 390, "height": 844})
+        page.goto(origin + path)
+        expect(page.get_by_label("Fund", exact=True)).to_be_visible()
+        expect(page.get_by_label("CNBC contributor", exact=True)).to_be_visible()
+        assert page.locator("#desk-navigation").evaluate("e => e.scrollWidth <= e.clientWidth")
+    assert errors == []
 
 
 def test_analytics_displays_classes_benchmarks_and_coverage(browser_app):

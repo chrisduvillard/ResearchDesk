@@ -419,3 +419,8 @@ footer {
     height: 190px;
   }
 }
+
+.research-shortcuts a.card { text-decoration: none; color: var(--ink); border-color: #c7d1bf; }
+.research-shortcuts a.card:hover { background: #edf3e6; }
+.research-shortcuts h2 { margin-bottom: 8px; }
+.research-shortcuts p { color: var(--muted); margin: 0; }

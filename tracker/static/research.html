@@ -5,9 +5,12 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Research Desk</title>
     <link rel="stylesheet" href="/static/research.css" />
+    <link rel="stylesheet" href="/static/navigation.css" />
+    <script src="/static/navigation.js" defer></script>
     <script src="/static/research.js" defer></script>
   </head>
   <body>
+    <nav id="desk-navigation" aria-label="Research navigation"><a href="/dan">Dan Nathan</a> · <a href="/dbmf">DBMF</a></nav>
     <a class="skip" href="#content">Skip to research</a>
     <header>
       <a class="brand" href="/"
@@ -25,15 +28,6 @@
       </form>
       <button id="owner-button">Owner login</button>
     </header>
-    <nav aria-label="Research views">
-      <a href="/?view=today">Today</a
-      ><a href="/research?view=contributors">Contributors</a
-      ><a href="/research?view=calls">Calls</a
-      ><a href="/research?view=funds">Funds</a
-      ><a href="/research?view=analytics">Follow / fade</a
-      ><a href="/research?view=sources">Sources & alerts</a
-      ><a href="/dan">Dan’s original desk ↗</a><a href="/dbmf">DBMF detail ↗</a>
-    </nav>
     <main id="content" tabindex="-1">
       <p role="status">Loading research…</p>
     </main>

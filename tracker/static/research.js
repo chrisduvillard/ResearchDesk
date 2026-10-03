@@ -117,7 +117,7 @@ async function today(signal) {
       "Today",
       "What changed, what disagrees, and what needs a closer look. Every observation leads back to its evidence.",
     ) +
-    `<div class="grid"><div class="card">Briefing cutoff<strong class="metric">07:00 Zurich</strong><small>${brief.briefing ? stamp(brief.briefing.cutoff) : "Awaiting the analytics worker"}</small></div><div class="card">Available sources<strong class="metric">${sources.filter((s) => ["available", "qualified"].includes(s.coverage)).length} / ${sources.length}</strong><small>Observation sources are still being qualified.</small></div><div class="card">Collection needs attention<strong class="metric">${sources.filter((s) => s.enabled && (s.stale || s.last_run?.status === "error")).length}</strong>${link("/research?view=sources", "Inspect source health →")}</div></div><div class="two"><section class="panel"><h2>Morning briefing</h2>${eventList(brief.items)}</section><section class="panel"><h2>Since the cutoff</h2>${eventList(brief.live)}</section></div>`
+    `<div class="grid research-shortcuts"><a class="card" href="/dbmf"><h2>DBMF holdings & exposure →</h2><p>Current positioning, report comparisons, charts, and exposure history.</p></a><a class="card" href="/dan"><h2>Dan Nathan’s positions →</h2><p>Disclosed positions, recent changes, price charts, and scorecard.</p></a></div><div class="grid"><div class="card">Briefing cutoff<strong class="metric">07:00 Zurich</strong><small>${brief.briefing ? stamp(brief.briefing.cutoff) : "Awaiting the analytics worker"}</small></div><div class="card">Available sources<strong class="metric">${sources.filter((s) => ["available", "qualified"].includes(s.coverage)).length} / ${sources.length}</strong><small>Observation sources are still being qualified.</small></div><div class="card">Collection needs attention<strong class="metric">${sources.filter((s) => s.enabled && (s.stale || s.last_run?.status === "error")).length}</strong>${link("/research?view=sources", "Inspect source health →")}</div></div><div class="two"><section class="panel"><h2>Morning briefing</h2>${eventList(brief.items)}</section><section class="panel"><h2>Since the cutoff</h2>${eventList(brief.live)}</section></div>`
   );
 }
 async function contributors(params, signal) {
@@ -130,7 +130,7 @@ async function contributors(params, signal) {
         "Contributors",
         "Disclosure observations and reviewed on-air calls remain separate research streams.",
       ) +
-      `<div class="grid">${profiles.map((p) => `<article class="card"><h2>${link("/research?view=contributors&id=" + p.id, p.name)}</h2>${badge(p.coverage, p.coverage === "unavailable")}<p class="muted">${esc(p.reason || "Automatic disclosure observation")}</p>${link(p.source_url, "Official source ↗")} · ${link("/research?view=calls&contributor=" + p.id, "Reviewed calls")}</article>`).join("")}</div>`
+      `<div class="grid">${profiles.map((p) => `<article class="card"><h2>${link(p.id === "dan-nathan" ? "/dan" : "/research?view=contributors&id=" + p.id, p.name)}</h2>${badge(p.coverage, p.coverage === "unavailable")}<p class="muted">${esc(p.reason || "Automatic disclosure observation")}</p>${link(p.source_url, "Official source ↗")} · ${link("/research?view=calls&contributor=" + p.id, "Reviewed calls")}</article>`).join("")}</div>`
     );
   const profile = profiles.find((p) => p.id === id);
   if (!profile) throw Error("Contributor not found");
@@ -290,7 +290,8 @@ async function record(params, signal) {
   );
 }
 async function funds(params, signal) {
-  const [funds, comparison] = await Promise.all([
+  const f = params.get("fund");
+  const [funds, comparison] = f ? [[], null] : await Promise.all([
     api("/funds", "GET", undefined, signal),
     api(
       "/fund-comparisons?funds=DBMF,KMLM,CTA,WTMF,ARKK,ARKQ,ARKW,ARKG,ARKF,ARKX&measure=" +
@@ -302,7 +303,6 @@ async function funds(params, signal) {
       signal,
     ),
   ]);
-  const f = params.get("fund");
   let detail = "";
   if (f) {
     const result = await api(
@@ -355,6 +355,8 @@ async function funds(params, signal) {
         : empty("Automatic holdings are unavailable for this source.")
     }</section>`;
   }
+  if (f) return title("Fund research", f + " positioning", "Holdings, changes, and source evidence.") +
+    `<div class="actions">${link("/research?view=funds", "Compare funds →")}</div>` + detail;
   return (
     title(
       "ETF research",
@@ -380,7 +382,7 @@ async function funds(params, signal) {
     )}</select></label><button>Compare</button></form><section class="panel"><div class="table-wrap"><table><thead><tr><th>Fund</th><th>Source date</th>${comparison.columns.map((c) => `<th>${assetLink(c, c.replace("market:", ""))}</th>`).join("")}</tr></thead><tbody>${comparison.rows
       .map(
         (r) =>
-          `<tr><th>${link("/research?view=funds&fund=" + r.fund_id, r.fund_id)}</th><td>${stamp(r.source_date)} ${r.stale ? badge("stale / missing", true) : ""}</td>${comparison.columns
+          `<tr><th>${link(r.fund_id === "DBMF" ? "/dbmf" : "/research?view=funds&fund=" + r.fund_id, r.fund_id)}</th><td>${stamp(r.source_date)} ${r.stale ? badge("stale / missing", true) : ""}</td>${comparison.columns
             .map((k) => {
               const c = r.cells[k];
               return `<td class="number ${c.value == null ? "heat-missing" : c.value >= 0 ? "heat-pos" : "heat-neg"}">${c.value == null ? "—" : fmt(c.value) + "%"}<small><br>${c.change_pp == null ? "No prior comparison" : (c.change_pp > 0 ? "+" : "") + fmt(c.change_pp) + " pp"}</small></td>`;
@@ -389,7 +391,7 @@ async function funds(params, signal) {
       )
       .join(
         "",
-      )}</tbody></table></div></section>${detail}<div class="grid">${funds.map((f) => `<article class="card"><h3>${link("/research?view=funds&fund=" + f.id, f.id)}</h3>${badge(f.coverage, !f.qualified)}<p>${esc(f.reason || "Qualified automatic collection")}</p><small>Latest ${stamp(f.latest?.source_date)}</small></article>`).join("")}</div>`
+      )}</tbody></table></div></section>${detail}<div class="grid">${funds.map((f) => `<article class="card"><h3>${link(f.id === "DBMF" ? "/dbmf" : "/research?view=funds&fund=" + f.id, f.id)}</h3>${badge(f.coverage, !f.qualified)}<p>${esc(f.reason || "Qualified automatic collection")}</p><small>Latest ${stamp(f.latest?.source_date)}</small></article>`).join("")}</div>`
   );
 }
 async function asset(params, signal) {
@@ -652,6 +654,15 @@ async function render() {
     version = ++generation;
   const params = new URLSearchParams(location.search),
     view = params.get("view") || "today";
+  if (view === "funds" && params.get("fund") === "DBMF") {
+    location.replace("/dbmf");
+    return;
+  }
+  if (view === "contributors" && params.get("id") === "dan-nathan") {
+    location.replace("/dan");
+    return;
+  }
+  window.DeskNavigation?.sync();
   content.setAttribute("aria-busy", "true");
   try {
     let html;
@@ -695,14 +706,7 @@ async function render() {
     }
     if (version !== generation) return;
     content.innerHTML = html;
-    document
-      .querySelectorAll("nav a")
-      .forEach((a) =>
-        a.setAttribute(
-          "aria-current",
-          new URL(a.href).searchParams.get("view") === view ? "page" : "false",
-        ),
-      );
+    window.DeskNavigation?.sync();
     bind();
   } catch (error) {
     if (error.name !== "AbortError" && version === generation)
