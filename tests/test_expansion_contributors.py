@@ -89,6 +89,33 @@ def login(client):
     return {"X-CSRF-Token": r.json()["csrf_token"]}
 
 
+def test_contributor_has_data_requires_accepted_disclosure_or_approved_call(database):
+    from tracker.auth import setup_owner
+    from tracker.research import ingest_disclosure, sync_legacy
+
+    setup_owner(database, "a long local test password")
+    sync_legacy(database)
+    ingest_disclosure(database, "karen-finerman", page("Karen Finerman has no positions."), moment())
+    ingest_disclosure(database, "guy-adami", "<html>missing</html>", moment())
+    with TestClient(app, base_url="https://testserver") as client:
+        def available():
+            return {r["id"] for r in client.get("/api/v2/contributors").json() if r["has_data"]}
+
+        assert available() == {"karen-finerman"}  # Explicitly empty is still evidence.
+        headers = login(client)
+        call = client.post("/api/v2/calls", headers=headers, json=dict(
+            contributor_id="josh-brown", asset_id="legacy:MSFT", action="long",
+            spoken_at="2026-01-05T15:00:00-05:00", timezone="America/New_York",
+            source_url="https://www.cnbc.com/video/example", excerpt="Buy Microsoft.",
+            horizon="several weeks",
+        )).json()
+        assert available() == {"karen-finerman"}
+        assert client.post(f"/api/v2/calls/{call['id']}/approve", headers=headers, json={"revision": 1}).status_code == 200
+        assert available() == {"karen-finerman", "josh-brown"}
+        assert client.post(f"/api/v2/calls/{call['id']}/retract", headers=headers, json={"revision": 2, "reason": "Withdrawn"}).status_code == 200
+        assert available() == {"karen-finerman"}
+
+
 def test_call_approval_revision_and_retraction_timing(database):
     from tracker.auth import setup_owner
     from tracker.research import sync_legacy

@@ -52,9 +52,13 @@ def history_rows(conn, response, table, where, params, scope, cursor, limit):
 def contributors():
     with db.database() as conn:
         return [
-            dict(r)
+            dict(r, has_data=bool(r["has_data"]))
             for r in conn.execute(
-                "SELECT c.*,s.coverage,s.reason,s.url AS source_url FROM contributors c JOIN sources s ON s.contributor_id=c.id ORDER BY c.name"
+                """SELECT c.*,s.coverage,s.reason,s.url AS source_url,
+                (EXISTS(SELECT 1 FROM disclosures d WHERE d.contributor_id=c.id AND d.status='accepted')
+                 OR EXISTS(SELECT 1 FROM calls call JOIN call_revisions r ON r.id=call.current_revision
+                           WHERE call.contributor_id=c.id AND r.status='approved')) AS has_data
+                FROM contributors c JOIN sources s ON s.contributor_id=c.id ORDER BY c.name"""
             )
         ]
 

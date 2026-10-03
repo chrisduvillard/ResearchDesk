@@ -200,12 +200,28 @@ def test_legacy_bookmark_redirect(browser_app):
 
 def test_shared_fund_and_contributor_switchers(browser_app):
     from playwright.sync_api import expect
+    from conftest import page as disclosure_page, moment
+    from tracker.history import ingest
+    from tracker.research import ingest_disclosure, sync_legacy
+    from tracker.dbmf import store
+    from tracker.funds import accept_report, parse_kmlm, sync_dbmf
 
     context, origin, _ = browser_app
+    fixtures = Path(__file__).parent / "fixtures"
+    with db.database() as conn:
+        ingest(conn, disclosure_page(), moment(), resolve=False)
+        ingest_disclosure(conn, "karen-finerman", disclosure_page("Karen Finerman is long MSFT."), moment())
+        store.ingest(conn, (fixtures / "dbmf/live.html").read_text(), moment("2026-10-01T22:30:00-04:00"))
+        sync_legacy(conn)
+        sync_dbmf(conn)
+        raw = (fixtures / "funds/kmlm.csv").read_bytes()
+        accept_report(conn, "KMLM", parse_kmlm(raw, net_assets="562525502", expected_date="2026-10-01"), raw)
     page = context.new_page()
     errors = []
     page.on("pageerror", lambda error: errors.append(str(error)))
     page.goto(origin)
+    expect(page.locator("#desk-person option[value='josh-brown']")).to_have_count(0)
+    expect(page.locator("#desk-fund option[value='WTMF']")).to_have_count(0)
     page.get_by_label("Fund", exact=True).select_option("DBMF")
     page.wait_for_url(re.compile(r"/dbmf(?:\?|$)"))
     expect(page.get_by_role("heading", name="Current positioning")).to_be_visible()
@@ -223,6 +239,7 @@ def test_shared_fund_and_contributor_switchers(browser_app):
     expect(page.get_by_label("CNBC contributor", exact=True)).to_have_value("karen-finerman")
     page.get_by_role("link", name="Compare funds", exact=True).click()
     expect(page.get_by_role("heading", name="Fund positioning")).to_be_visible()
+    expect(page.get_by_role("link", name="WTMF", exact=True)).to_have_count(0)
     page.go_back()
     expect(page.get_by_label("CNBC contributor", exact=True)).to_have_value("karen-finerman")
     page.goto(origin + "/research?view=funds&fund=DBMF")

@@ -130,7 +130,7 @@ async function contributors(params, signal) {
         "Contributors",
         "Disclosure observations and reviewed on-air calls remain separate research streams.",
       ) +
-      `<div class="grid">${profiles.map((p) => `<article class="card"><h2>${link(p.id === "dan-nathan" ? "/dan" : "/research?view=contributors&id=" + p.id, p.name)}</h2>${badge(p.coverage, p.coverage === "unavailable")}<p class="muted">${esc(p.reason || "Automatic disclosure observation")}</p>${link(p.source_url, "Official source ↗")} · ${link("/research?view=calls&contributor=" + p.id, "Reviewed calls")}</article>`).join("")}</div>`
+      `<div class="grid">${profiles.filter((p) => p.has_data).map((p) => `<article class="card"><h2>${link(p.id === "dan-nathan" ? "/dan" : "/research?view=contributors&id=" + p.id, p.name)}</h2>${badge(p.coverage, p.coverage === "unavailable")}<p class="muted">${esc(p.reason || "Automatic disclosure observation")}</p>${link(p.source_url, "Official source ↗")} · ${link("/research?view=calls&contributor=" + p.id, "Reviewed calls")}</article>`).join("")}</div>`
     );
   const profile = profiles.find((p) => p.id === id);
   if (!profile) throw Error("Contributor not found");
@@ -291,18 +291,14 @@ async function record(params, signal) {
 }
 async function funds(params, signal) {
   const f = params.get("fund");
-  const [funds, comparison] = f ? [[], null] : await Promise.all([
-    api("/funds", "GET", undefined, signal),
-    api(
-      "/fund-comparisons?funds=DBMF,KMLM,CTA,WTMF,ARKK,ARKQ,ARKW,ARKG,ARKF,ARKX&measure=" +
-        encodeURIComponent(params.get("measure") || "notional_pct_nav") +
-        "&mode=" +
-        (params.get("mode") || "latest"),
-      "GET",
-      undefined,
-      signal,
-    ),
-  ]);
+  const funds = f ? [] : (await api("/funds", "GET", undefined, signal)).filter(fund => fund.latest != null);
+  const comparison = funds.length ? await api(
+    "/fund-comparisons?" + new URLSearchParams({
+      funds: funds.map(fund => fund.id).join(","),
+      measure: params.get("measure") || "notional_pct_nav",
+      mode: params.get("mode") || "latest",
+    }), "GET", undefined, signal,
+  ) : { columns: [], rows: [] };
   let detail = "";
   if (f) {
     const result = await api(
@@ -357,6 +353,7 @@ async function funds(params, signal) {
   }
   if (f) return title("Fund research", f + " positioning", "Holdings, changes, and source evidence.") +
     `<div class="actions">${link("/research?view=funds", "Compare funds →")}</div>` + detail;
+  if (!funds.length) return title("ETF research", "Fund positioning", "No fund holdings have been collected yet.");
   return (
     title(
       "ETF research",
@@ -815,6 +812,7 @@ function bind() {
             revision: Number(b.dataset.revision),
             reason,
           });
+          window.DeskNavigation?.refresh();
           render();
         } catch (e) {
           toast(e.message);
@@ -854,6 +852,7 @@ function bind() {
           await api("/sources/" + encodeURIComponent(b.dataset.source), "PUT", {
             enabled: b.dataset.enabled === "1",
           });
+          window.DeskNavigation?.refresh();
           render();
         } catch (e) {
           toast(e.message);

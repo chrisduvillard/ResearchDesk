@@ -3,23 +3,14 @@
 (() => {
   const root = document.querySelector("#desk-navigation");
   if (!root) return;
-  const contributors = [
-    ["dan-nathan", "Dan Nathan"],
-    ["karen-finerman", "Karen Finerman"],
-    ["guy-adami", "Guy Adami"],
-    ["josh-brown", "Josh Brown"],
-    ["steve-weiss", "Steve Weiss"],
-    ["tim-seymour", "Tim Seymour"],
-  ];
-  const funds = ["DBMF", "KMLM", "CTA", "WTMF", "ARKK", "ARKQ", "ARKW", "ARKG", "ARKF", "ARKX"];
   root.innerHTML = `
     <div class="desk-nav-primary">
       <a class="desk-home" href="/?view=today" data-desk-view="today">Today</a>
       <div class="desk-selector"><label for="desk-person">CNBC contributor</label>
-        <select id="desk-person"><option value="">Choose a person</option>${contributors.map(([id, name]) => `<option value="${id}">${name}</option>`).join("")}</select>
+        <select id="desk-person" disabled aria-busy="true"><option value="">Loading people…</option></select>
       </div>
       <div class="desk-selector"><label for="desk-fund">Fund</label>
-        <select id="desk-fund"><option value="">Choose a fund</option>${funds.map(id => `<option value="${id}">${id}</option>`).join("")}</select>
+        <select id="desk-fund" disabled aria-busy="true"><option value="">Loading funds…</option></select>
       </div>
     </div>
     <div class="desk-nav-tools">
@@ -51,8 +42,37 @@
       else a.removeAttribute("aria-current");
     }
   }
-  window.DeskNavigation = { sync };
-  window.addEventListener("pageshow", sync);
+  async function loadChoices(select, path, hasData, prompt) {
+    try {
+      const response = await fetch("/api/v2/" + path, { signal: AbortSignal.timeout(15000) });
+      if (!response.ok) throw Error("Could not load choices");
+      const order = path === "funds"
+        ? ["DBMF", "KMLM", "CTA", "WTMF", "ARKK", "ARKQ", "ARKW", "ARKG", "ARKF", "ARKX"]
+        : ["dan-nathan", "karen-finerman", "guy-adami", "josh-brown", "steve-weiss", "tim-seymour"];
+      const rank = id => order.includes(id) ? order.indexOf(id) : order.length;
+      const rows = (await response.json()).filter(hasData).sort((a, b) => rank(a.id) - rank(b.id));
+      select.replaceChildren(new Option(rows.length ? prompt : "No data yet", ""));
+      for (const row of rows) select.add(new Option(path === "funds" ? row.id : row.name, row.id));
+      select.disabled = rows.length === 0;
+      sync();
+    } catch {
+      select.replaceChildren(new Option("Could not load — refresh", ""));
+      select.disabled = true;
+    } finally {
+      select.removeAttribute("aria-busy");
+    }
+  }
+  function refresh() {
+    // A source outage must not discard previously accepted data. Coverage and
+    // qualification describe reliability; stored evidence controls visibility.
+    return Promise.allSettled([
+      loadChoices(person, "contributors", row => row.has_data, "Choose a person"),
+      loadChoices(fund, "funds", row => row.latest != null, "Choose a fund"),
+    ]);
+  }
+  window.DeskNavigation = { sync, refresh };
+  window.addEventListener("pageshow", event => { sync(); if (event.persisted) refresh(); });
   window.addEventListener("popstate", sync);
   sync();
+  refresh();
 })();
