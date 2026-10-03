@@ -40,7 +40,7 @@ jobs:
             --tmpfs /tmp:rw --tmpfs /data:rw,uid=1000,gid=1000 \
             -p 127.0.0.1:18765:8000 research-desk:ci
           curl --fail --retry 15 --retry-all-errors --retry-delay 1 --max-time 5 http://127.0.0.1:18765/health
-          for route in / /dbmf /docs /openapi.json /api/positions /api/dbmf/status /static/vendor/lightweight-charts.js /static/vendor/swagger/swagger-ui-bundle.js; do
+          for route in / /dan /dbmf /research /docs /openapi.json /api/positions /api/dbmf/status /api/v2/auth /api/v2/contributors /api/v2/funds /api/v2/briefings /api/v2/sources/status /static/research.js /static/vendor/lightweight-charts.js /static/vendor/swagger/swagger-ui-bundle.js; do
             curl --fail --silent --show-error --output /dev/null "http://127.0.0.1:18765$route"
           done
       - name: Show server logs and clean up
@@ -120,7 +120,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Compose configuration is invalid' }
           $config = ($configJson -join "`n") | ConvertFrom-Json
           $serviceNames = @($config.services.PSObject.Properties.Name | Sort-Object)
-          if (($serviceNames -join ',') -ne 'collector,dbmf-collector,web') { throw 'Unexpected services' }
+          if (($serviceNames -join ',') -ne 'analytics,collector,dbmf-collector,migrate,web') { throw 'Unexpected services' }
           foreach ($name in $serviceNames) {
             $service = $config.services.$name
             if (!$service.read_only -or $service.user -ne '1000:1000') { throw "Invalid defaults for $name" }
@@ -128,7 +128,12 @@ jobs:
             if ($volume.Count -ne 1 -or $volume[0].type -ne 'bind') { throw "Missing data bind for $name" }
             if ([IO.Path]::GetFullPath($volume[0].source) -ne (Join-Path $PWD.Path 'data')) { throw "Wrong data path for $name" }
             if ($volume[0].bind.create_host_path) { throw "Compose must require the data directory for $name" }
+            if ($service.environment.REQUIRE_MIGRATION -ne '1') { throw "Migration enforcement missing for $name" }
+            if ($name -ne 'migrate' -and $service.depends_on.migrate.condition -ne 'service_completed_successfully') {
+              throw "Service $name must wait for migration"
+            }
           }
+          if ($config.services.migrate.restart -ne 'no') { throw 'Migration must be one-shot' }
           $port = @($config.services.web.ports)
           if ($port.Count -ne 1 -or $port[0].host_ip -ne '127.0.0.1' -or $port[0].published -ne '8765') {
             throw 'Dashboard must bind to localhost:8765'
