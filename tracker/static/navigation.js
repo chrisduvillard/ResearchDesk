@@ -23,19 +23,19 @@
   const fund = root.querySelector("#desk-fund");
   person.addEventListener("change", () => {
     if (person.value) location.assign(person.value === "dan-nathan" ? "/dan" :
-      "/research?view=contributors&id=" + encodeURIComponent(person.value));
+      "/contributors/" + encodeURIComponent(person.value));
   });
   fund.addEventListener("change", () => {
     if (fund.value) location.assign(fund.value === "DBMF" ? "/dbmf" :
-      "/research?view=funds&fund=" + encodeURIComponent(fund.value));
+      "/funds/" + encodeURIComponent(fund.value));
   });
   function sync() {
     const params = new URLSearchParams(location.search);
     const view = params.get("view") || "today";
     const research = ["/", "/research"].includes(location.pathname);
-    person.value = location.pathname === "/dan" ? "dan-nathan" : research ?
+    person.value = location.pathname.startsWith("/contributors/") ? decodeURIComponent(location.pathname.split("/")[2]) : location.pathname === "/dan" ? "dan-nathan" : research ?
       (view === "contributors" ? params.get("id") : params.get("contributor")) || "" : "";
-    fund.value = location.pathname === "/dbmf" ? "DBMF" : research && view === "funds" ? params.get("fund") || "" : "";
+    fund.value = location.pathname.startsWith("/funds/") ? decodeURIComponent(location.pathname.split("/")[2]) : location.pathname === "/dbmf" ? "DBMF" : research && view === "funds" ? params.get("fund") || "" : "";
     for (const a of root.querySelectorAll("[data-desk-view]")) {
       if (research && a.dataset.deskView === view && !(view === "funds" && fund.value))
         a.setAttribute("aria-current", "page");

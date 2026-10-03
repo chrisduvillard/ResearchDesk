@@ -101,7 +101,7 @@ function toast(message) {
   state.toast = setTimeout(() => $("toast").classList.add("hidden"), 3200);
 }
 async function get(url, asText = false) {
-  const response = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(15000) });
+  const response = await fetch(window.DeskContext ? DeskContext.url(url) : url, { cache: "no-store", signal: AbortSignal.timeout(15000) });
   if (!response.ok) {
     let message;
     try {
@@ -135,7 +135,7 @@ const state = {
   historyRequest: 0,
   scoreRequest: 0,
 };
-const initialView = Desk.loadView("dan");
+const initialView = Desk.loadView(DeskContext.scope);
 function applyView(view) {
   state.page=view.page;state.selected=view.symbol||null;state.range=view.range;state.horizon=Number(view.horizon);
   state.historyFilter=view.history;state.scoreFilter=view.score;
@@ -146,10 +146,10 @@ function applyView(view) {
   state.shade?.applyOptions({visible:$("shade-toggle").checked});
 }
 function remember(push=false) {
-  Desk.saveView("dan",{page:state.page,symbol:state.selected||"",range:state.range,horizon:String(state.horizon),
+  Desk.saveView(DeskContext.scope,{page:state.page,symbol:state.selected||"",range:state.range,horizon:String(state.horizon),
     history:state.historyFilter||"",score:state.scoreFilter||"",shade:$("shade-toggle").checked?"1":"0",changes:$("changes-period").value},push);
 }
-function activity() {return Desk.activity("dan",$("changes-period").value,null,e=>showEvidence(e.id,e));}
+function activity() {return Desk.activity(DeskContext.scope,$("changes-period").value,null,e=>showEvidence(e.id,e));}
 function setPage(page, push=true) {
   if (!["overview", "history", "scorecard"].includes(page)) page = "overview";
   state.page = page;
@@ -173,6 +173,7 @@ function setPage(page, push=true) {
 }
 function renderStatus(s) {
   state.status = s;
+  DeskContext.apply(s);
   $("active-count").textContent = s.active_instruments;
   $("bull-count").textContent = s.bullish;
   $("bear-count").textContent = s.bearish;
@@ -381,12 +382,15 @@ async function selectInstrument(symbol,{navigate=false,save=false}={}) {
     $("price-note").textContent = ""; $("observation-note").textContent = "";
   }
   state.selected = symbol;
+  DeskContext.selected=symbol;
+  window.DeskOwner?.selection();
   if(save)remember(true);
   if(navigate)Desk.reveal("instrument-detail");
   renderPositions();
   const current = state.positions.find((p) => p.symbol === symbol),
     instrument = current || state.instruments.find((p) => p.symbol === symbol);
   if (!instrument) return;
+  DeskContext.direction=current?.direction;DeskContext.reviewable=current?.strategies.length===1;window.DeskOwner?.selection();
   $("chart-title").textContent = instrument.name;
   window.OptionsDesk.load(symbol, instrument.name);
   $("chart-category").textContent = (
@@ -564,7 +568,7 @@ function showEvidence(id, supplied=null) {
           `<p><strong>${esc(strategyName(p))}</strong><br>${esc(p.explanation)}</p>`,
       )
       .join("") + (e.reason ? `<p>Review: ${esc(e.reason)}</p>` : "");
-  $("download-source").href = "/api/snapshots/" + e.snapshot_id + "/source";
+  $("download-source").href = e.source_href || "/api/snapshots/" + e.snapshot_id + "/source";
   $("evidence-dialog").showModal();
 }
 async function loadScores() {
@@ -583,6 +587,10 @@ async function loadScores() {
     );
     if (request !== state.scoreRequest) return;
     state.scores = data;
+    const prior=$('score-class').value;
+    const classes=[...new Set(data.summary.map(r=>r.asset_class||'All'))];
+    $('score-class').innerHTML=classes.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+    $('score-class').value=classes.includes(prior)?prior:classes[0];
     renderScores();
   } catch (e) {
     if (request !== state.scoreRequest) return;
@@ -593,40 +601,47 @@ async function loadScores() {
 function renderScores() {
   if (!state.scores) return;
   const data = state.scores;
-  const row = data.summary.find((r) => r.horizon === state.horizon);
+  const rows=data.summary.filter(r=>!r.asset_class||r.asset_class===$('score-class').value);
+  const row = rows.find((r) => r.horizon === state.horizon);
+  if(!row)return;
+  const suffix=$('score-cost').value==='net'?'_net':'';
   const modes = [
-    ["follow", "Follow his direction", "Directional return"],
-    ["oppose", "Oppose his direction", "Opposite directional return"],
+    ["follow", "Follow direction", "Directional return"],
+    ["oppose", "Fade direction", "Opposite directional return"],
     ["always_long", "Always long", "Same instrument and dates"],
   ];
   $("score-cards").innerHTML = modes
     .map(([key, title, subtitle]) => {
-      const m = row[key];
+      const m = row[key+suffix]||row[key];
       return `<article class="score-card ${key}"><div class="score-label"><span>${esc(title)}</span><span>${key === "follow" ? "↗" : key === "oppose" ? "↘" : "→"}</span></div><div class="score-big ${m.mean == null ? "" : m.mean >= 0 ? "bullish" : "bearish"}">${percent(m.mean)}</div><p class="fine-print">${esc(subtitle)} · ${state.horizon} session${state.horizon === 1 ? "" : "s"}</p><div class="score-meta"><span>Win rate <strong>${win(m.win_rate)}</strong></span><span>Median <strong>${percent(m.median)}</strong></span></div></article>`;
     })
     .join("");
   $("sample-note").textContent =
-    `${row.follow.n} completed signals · ${row.pending} pending`;
+    `${row.follow.n} completed signals · ${row.pending} pending · ${row.overlaps||0} overlaps excluded`;
   $("score-empty").classList.toggle("hidden", row.follow.n > 0);
   $("pending-note").textContent = row.missing
     ? `${row.missing} signals awaiting complete price data`
     : row.pending
       ? `${row.pending} measurement periods still in progress`
       : "Prospective tracking · no invented historical trades";
-  $("score-summary").innerHTML = data.summary
+  $("score-summary").innerHTML = rows
     .map(
       (r) =>
-        `<tr><td>${r.horizon} session${r.horizon === 1 ? "" : "s"}</td><td>${percent(r.follow.mean)}</td><td>${percent(r.oppose.mean)}</td><td>${percent(r.always_long.mean)}</td><td>${r.follow.n}</td><td>${r.pending} / ${r.missing}</td></tr>`,
+        `<tr><td>${r.horizon} session${r.horizon === 1 ? "" : "s"}</td><td>${percent((r["follow"+suffix]||r.follow).mean)}</td><td>${percent((r["oppose"+suffix]||r.oppose).mean)}</td><td>${percent((r["always_long"+suffix]||r.always_long).mean)}</td><td>${r.follow.n}</td><td>${r.pending} / ${r.missing}</td></tr>`,
     )
     .join("");
-  $("methodology-text").textContent = data.methodology;
+  $("methodology-text").textContent = data.methodology + (data.assumptions ? ` Trading cost: ${data.assumptions.cost_bps} bps per side. Annual short borrowing: ${data.assumptions.borrow_rate*100}%.` : '') + (data.as_of ? ' Calculated '+datetime(data.as_of)+'.' : '');
+  let saved=$('saved-score-run');
+  if(!saved){saved=document.createElement('p');saved.id='saved-score-run';$('methodology-text').after(saved);}
+  saved.innerHTML=data.run_id?`<a href="/research?view=analytics&run=${encodeURIComponent(data.run_id)}">Saved inputs, benchmark comparisons and uncertainty →</a>`:'';
   $("signals-list").innerHTML = data.signals.length
     ? data.signals
+        .filter(s=>!s.asset_class||s.asset_class===$("score-class").value)
         .slice()
         .reverse()
         .map(
           (s) =>
-            `<div class="signal-item"><div><strong>${esc(s.name)}</strong>${badge(s.direction)} · Observed ${esc(date(s.observed_at))}</div><div>Entry ${esc(date(s.entry_date))} · ${s.results[String(state.horizon)].status === "complete" ? percent(s.results[String(state.horizon)].follow) : esc(s.results[String(state.horizon)].status.replaceAll("_", " "))}</div></div>`,
+            `<div class="signal-item"><div><strong>${esc(s.name)}</strong>${badge(s.direction)} · Observed ${esc(date(s.observed_at))}</div><div>Entry ${esc(date(s.entry_date))} · ${s.results[String(state.horizon)].status === "complete" ? percent(s.results[String(state.horizon)]["follow"+suffix]) : esc(s.results[String(state.horizon)].status.replaceAll("_", " "))}</div></div>`,
         )
         .join("")
     : '<div class="empty">New directional disclosures will appear here.</div>';
@@ -669,7 +684,7 @@ async function refresh() {
     const changed =
       !state.status ||
       state.status.last_run?.finished_at !== status.last_run?.finished_at ||
-      state.status.event_count !== status.event_count;
+      state.status.event_count !== status.event_count || state.status.price_version !== status.price_version;
     state.positions = positions;
     state.instruments = instruments;
     renderStatus(status);
@@ -680,6 +695,12 @@ async function refresh() {
         positions[0]?.symbol ||
         instruments[0]?.symbol;
     renderPositions();
+    if(!state.selected){
+      $('chart-title').textContent='No disclosed instruments';
+      $('chart-message').textContent=status.disclosure?'The accepted disclosure contains no positions.':'No accepted disclosure is available yet.';
+      $('chart-message').classList.remove('hidden');
+      $('analysis-content').textContent='No current disclosed strategies. Reviewed calls are available separately.';
+    }
     if ((changed || state.chartNeedsRefresh) && state.selected) await selectInstrument(state.selected);
     if (changed && state.page === "history") loadHistory();
     if (changed && state.page === "scorecard") loadScores();
@@ -749,16 +770,21 @@ for (const id of ["export-dialog", "evidence-dialog"])
   });
 applyView(initialView);
 setPage(state.page,false);
-window.addEventListener("popstate",()=>{applyView(Desk.loadView("dan",false));setPage(state.page,false);if(state.selected)selectInstrument(state.selected);activity();});
+window.addEventListener("popstate",()=>{applyView(Desk.loadView(DeskContext.scope,false));setPage(state.page,false);if(state.selected)selectInstrument(state.selected);activity();});
 refresh();
 setInterval(refresh, 60000);
 
 $("copy-script").addEventListener("click", async () => {
   try {
-    const script = await get("/downloads/dan-nathan.pine", true);
+    const script = await get("/downloads/research-desk.pine", true);
     await navigator.clipboard.writeText(script);
     toast("Indicator copied. Paste it into a new Pine Editor script.");
   } catch (e) {
     toast("Use Download indicator to get the script.");
   }
 });
+
+$("score-class").addEventListener("change",renderScores);
+$("score-cost").addEventListener("change",renderScores);
+
+window.addEventListener("contributor-review-saved",()=>{state.chartNeedsRefresh=true;refresh();});

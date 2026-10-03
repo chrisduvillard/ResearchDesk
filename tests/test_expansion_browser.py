@@ -227,7 +227,7 @@ def test_shared_fund_and_contributor_switchers(browser_app):
     expect(page.get_by_role("heading", name="Current positioning")).to_be_visible()
     expect(page.get_by_label("Fund", exact=True)).to_have_value("DBMF")
     page.get_by_label("Fund", exact=True).select_option("KMLM")
-    expect(page.get_by_role("heading", name="KMLM holdings")).to_be_visible()
+    expect(page.get_by_role("heading", name="KMLM’s market exposure")).to_be_visible()
     expect(page.get_by_label("Fund", exact=True)).to_have_value("KMLM")
     page.go_back()
     expect(page.get_by_label("Fund", exact=True)).to_have_value("DBMF")
@@ -235,7 +235,7 @@ def test_shared_fund_and_contributor_switchers(browser_app):
     page.wait_for_url(re.compile(r"/dan(?:\?|$)"))
     expect(page.get_by_role("heading", name="Dan Nathan’s positions")).to_be_visible()
     page.get_by_label("CNBC contributor", exact=True).select_option("karen-finerman")
-    expect(page.get_by_role("heading", name="Karen Finerman", exact=True)).to_be_visible()
+    expect(page.get_by_role("heading", name="Karen Finerman’s positions")).to_be_visible()
     expect(page.get_by_label("CNBC contributor", exact=True)).to_have_value("karen-finerman")
     page.get_by_role("link", name="Compare funds", exact=True).click()
     expect(page.get_by_role("heading", name="Fund positioning")).to_be_visible()
@@ -310,3 +310,62 @@ def test_analytics_displays_classes_benchmarks_and_coverage(browser_app):
         )
     ).to_have_count(2)
     expect(page.get_by_text("Buy-and-hold spy:", exact=False)).to_have_count(2)
+
+
+def test_full_dashboards_for_other_people_and_equity_funds(browser_app):
+    from playwright.sync_api import expect
+    from test_shared_desks import contributors, fund_report
+    from tracker.analysis_worker import price_batch
+
+    context, origin, _ = browser_app
+    with db.database() as conn:
+        contributors(conn)
+        fund_report(conn, 'ARKK', '2026-09-30', '4')
+        fund_report(conn, 'ARKK', '2026-10-01', '6', raw=b'second')
+        price_batch(conn,'legacy:MSFT','chart',dict(adjustment='Split and dividend adjusted',bars=[dict(time='2026-09-30',open=100,high=110,low=99,close=105,volume=10),dict(time='2026-10-01',open=105,high=112,low=103,close=110,volume=12)]),db.utcnow())
+    p=context.new_page(); errors=[]
+    p.on('pageerror',lambda e:errors.append(str(e)))
+    p.goto(origin+'/contributors/karen-finerman')
+    expect(p.get_by_role('heading',name='Karen Finerman’s positions')).to_be_visible()
+    expect(p.locator('#chart canvas').first).to_be_visible()
+    p.get_by_role('button',name=re.compile('History')).first.click()
+    expect(p.locator('#history-body tr')).to_have_count(2)
+    p.get_by_role('button',name='Scorecard',exact=True).click()
+    expect(p.locator('#score-cards article')).to_have_count(3)
+    p.get_by_label('Fund',exact=True).select_option('ARKK')
+    expect(p.get_by_role('heading',name='ARKK’s holdings')).to_be_visible()
+    expect(p.locator('#market-bars .market-bar-row')).to_have_count(1)
+    expect(p.locator('#dbmf-chart canvas').first).to_be_visible()
+    expect(p.locator('#heatmap .heatmap-cell')).to_have_count(2)
+    p.locator('#heatmap .heatmap-cell').first.click()
+    expect(p.locator('#comparison-caption')).to_contain_text('30 Sept 2026')
+    p.locator('#contract-evidence').evaluate('(e)=>e.open=true')
+    expect(p.locator('#evidence-content')).to_contain_text('Microsoft')
+    expect(p.locator('#evidence-content')).not_to_contain_text('NaN')
+    expect(p.locator('#evidence-content')).not_to_contain_text('Signed notional')
+    expect(p.locator('#health-content')).to_contain_text('ARKK')
+    expect(p.locator('#health-content')).not_to_contain_text('Dan Nathan')
+    p.set_viewport_size({'width':390,'height':844})
+    assert p.evaluate('document.documentElement.scrollWidth<=innerWidth')
+    p.reload()
+    expect(p.locator('#evidence-report')).not_to_have_value('NaN')
+    assert errors==[]
+
+
+def test_shared_contributor_retains_owner_direction_review(browser_app):
+    from playwright.sync_api import expect
+    from test_shared_desks import contributors
+    context,origin,password=browser_app
+    with db.database() as conn: contributors(conn)
+    p=context.new_page()
+    p.goto(origin+'/contributors/karen-finerman?symbol=MSFT')
+    expect(p.locator('#review-direction')).to_be_hidden()
+    assert context.request.post(origin+'/api/v2/auth/login',data={'password':password}).ok
+    p.reload()
+    p.get_by_role('button',name='Review direction',exact=True).click()
+    expect(p.locator('#direction-review')).to_be_visible()
+    p.get_by_label('Reviewed direction',exact=True).select_option('unknown')
+    p.get_by_label('Review reason',exact=True).fill('Attribution requires further evidence')
+    p.get_by_role('button',name='Save review',exact=True).click()
+    expect(p.locator('#chart-direction')).to_contain_text('Unknown')
+    assert context.request.get(origin+'/api/v2/contributors/guy-adami/positions').json()[0]['direction']=='bearish'

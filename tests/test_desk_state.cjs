@@ -45,3 +45,14 @@ test('Independent incidents and browser reloads keep their own notification life
 test('Dan bookmarks stay on contributor route after Today becomes the landing page', () => {
   assert.ok(desk.viewURL('dan', {page: 'history'}).startsWith('/dan?'));
 });
+
+test('Fund state preserves opaque report IDs and asset identities without leaking across funds', () => {
+  const scope='fund:ARKK', report='e48c9f1abcdef';
+  const view=desk.normalize(scope,{market:'cusip:594918104',report,compare:'date',compare_report:report});
+  assert.equal(view.report,report);
+  assert.equal(view.market,'cusip:594918104');
+  const url=desk.viewURL(scope,view);
+  assert.ok(url.startsWith('/funds/ARKK?'));
+  assert.deepEqual(desk.fromURL(scope,new URL(url,'http://localhost'),{}),view);
+  assert.ok(desk.viewURL('contributor:karen-finerman',{page:'history'}).startsWith('/contributors/karen-finerman?'));
+});

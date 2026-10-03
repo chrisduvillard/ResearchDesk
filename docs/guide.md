@@ -221,3 +221,22 @@ Routes abbreviated in the DBMF rows share the `/api/dbmf` prefix. Revision listi
 | No browser notification | Enable alerts in Data health, allow notifications in browser settings, and keep a tab open. Mobile/browser support varies. |
 | Saved view looks different on another device | Preferences and visit markers are browser-local. Use the bookmarked URL to transfer a view. |
 | No source revisions listed | No accepted version of that reporting date/source has changed. Repeated downloads are deduplicated. |
+
+### The same desk for every source
+
+The CNBC selector opens the full Disclosure Desk for each person: Overview,
+History, Scorecard, instrument charts, strategy details, source evidence and
+exports. Each person's selections and last-visit comparison are saved separately.
+The scorecard separates asset classes and offers gross or modeled net returns;
+the saved-run link exposes assumptions, benchmarks and reproducible inputs.
+
+The fund selector opens the full Exposure Desk for every available fund. Compare
+reports, select a market or holding, inspect synchronized price and positioning
+charts, click the history heatmap, and download the source or history CSV. Equity
+funds use holding weights and stock prices in the same layout. Futures notional,
+collateral and issuer risk measures remain separate.
+
+A new source may have only one reporting date: its charts show that observation,
+and comparisons become available after another accepted date. Price history is
+collected in the background. Unverified listings and unavailable price references
+are labeled; they do not prevent browsing the preserved holdings evidence.

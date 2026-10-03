@@ -46,7 +46,7 @@ async def response_headers(request, call_next):
     response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
     if request.url.path.startswith("/api/"):
         response.headers["Cache-Control"] = "no-store"
-    elif request.url.path in ("/", "/dan", "/research", "/dbmf", "/docs") or request.url.path.startswith('/static/'):
+    elif request.url.path in ("/", "/dan", "/research", "/dbmf", "/docs") or request.url.path.startswith(('/static/', '/contributors/', '/funds/')):
         # Revalidate the application shell/assets across deployments. Versioned
         # links alone cannot invalidate a previously cached HTML entry point.
         response.headers["Cache-Control"] = "no-cache"
@@ -236,3 +236,39 @@ async def hypothetical_payoff(request: Request):
         return calculate_payoff(json.loads(payload))
     except (ValueError, TypeError, KeyError, OverflowError) as exc:
         raise HTTPException(400, str(exc)) from exc
+
+
+from .dashboard_api import router as dashboard_router
+
+app.include_router(dashboard_router)
+
+
+@app.get("/contributors/{contributor_id}")
+def contributor_page(contributor_id: str):
+    from .contributor_desk import profile
+
+    with db.database() as conn:
+        profile(conn, contributor_id)
+    return FileResponse(ROOT / "static" / "index.html")
+
+
+@app.get("/funds/{fund_id}")
+def fund_page(fund_id: str):
+    from .fund_desk import profile
+
+    with db.database() as conn:
+        profile(conn, fund_id)
+    return FileResponse(ROOT / "static" / "dbmf.html")
+
+
+@app.get("/downloads/research-desk.pine", response_class=PlainTextResponse)
+def shared_pine_script():
+    text = (
+        (ROOT / "pine" / "dan-nathan.pine")
+        .read_text()
+        .replace("Dan Nathan ·", "Research Desk ·")
+    )
+    return PlainTextResponse(
+        text,
+        headers={"Content-Disposition": 'attachment; filename="research-desk.pine"'},
+    )

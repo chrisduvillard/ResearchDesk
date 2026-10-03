@@ -651,12 +651,11 @@ async function render() {
     version = ++generation;
   const params = new URLSearchParams(location.search),
     view = params.get("view") || "today";
-  if (view === "funds" && params.get("fund") === "DBMF") {
-    location.replace("/dbmf");
-    return;
-  }
-  if (view === "contributors" && params.get("id") === "dan-nathan") {
-    location.replace("/dan");
+  if ((view === "funds" && params.get("fund")) || (view === "contributors" && params.get("id"))) {
+    const fund=view==='funds', id=params.get(fund?'fund':'id');
+    const target=fund?(id==='DBMF'?'/dbmf':'/funds/'+encodeURIComponent(id)):(id==='dan-nathan'?'/dan':'/contributors/'+encodeURIComponent(id));
+    const filters=new URLSearchParams(params);filters.delete('view');filters.delete(fund?'fund':'id');
+    location.replace(target+(filters.size?'?'+filters:'')+location.hash);
     return;
   }
   window.DeskNavigation?.sync();

@@ -5,7 +5,7 @@
   <meta name="theme-color" content="#f6f6f2"><title>DBMF · Exposure Desk</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23274035'/%3E%3Ctext x='32' y='43' fill='white' font-size='28' text-anchor='middle' font-family='serif'%3EDb%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="/static/style.css?v=1.5.1"><link rel="stylesheet" href="/static/dbmf.css?v=1.5.1">
-  <script src="/static/desk-state.js?v=1.5.1" defer></script><script src="/static/desk.js?v=1.5.1" defer></script><script src="/static/vendor/lightweight-charts.js" defer></script><script src="/static/dbmf.js?v=1.5.1" defer></script>
+  <script src="/static/desk-context.js" defer></script><script src="/static/desk-state.js?v=1.5.1" defer></script><script src="/static/desk.js?v=1.5.1" defer></script><script src="/static/vendor/lightweight-charts.js" defer></script><script src="/static/dbmf.js?v=1.5.1" defer></script>
   <link rel="stylesheet" href="/static/navigation.css" />
     <script src="/static/navigation.js" defer></script>
   </head>
@@ -19,7 +19,7 @@
     <div id="dbmf-error" class="alert hidden" role="alert"></div>
 
     <details id="data-health" class="panel data-health" tabindex="-1">
-      <summary><span><strong>Data health</strong><span id="health-summary">Checking both dashboards…</span></span><span id="health-checked"></span></summary>
+      <summary><span><strong>Data health</strong><span id="health-summary">Checking this source…</span></span><span id="health-checked"></span></summary>
       <div id="health-content"><p class="change-empty">Loading source dates and collection status…</p></div>
       <div class="alert-settings"><button id="browser-alerts" class="button secondary" aria-pressed="false">Enable browser alerts</button><p id="alert-note"></p></div>
     </details>

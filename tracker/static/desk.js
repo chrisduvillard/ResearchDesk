@@ -8,7 +8,7 @@
   const stamp = v => v ? date(v) + " · " + new Intl.DateTimeFormat("en-GB", {hour:"2-digit", minute:"2-digit", timeZone:"America/New_York"}).format(new Date(v)) + " ET" : "Not recorded";
   const pp = v => Number(v) !== 0 && Math.abs(Number(v)) < .005 ? (Number(v)>0 ? "Increase" : "Decrease") + " <0.01 pp" : (Number(v) > 0 ? "+" : "") + Number(v).toFixed(2) + " pp";
   async function get(url) {
-    const response = await fetch(url, {cache:"no-store", signal:AbortSignal.timeout(15000)});
+    const response = await fetch(window.DeskContext ? DeskContext.url(url) : url, {cache:"no-store", signal:AbortSignal.timeout(15000)});
     if (!response.ok) { const body = await response.json().catch(() => ({})); const error = new Error(body.detail || `Request failed (${response.status})`); error.status=response.status; throw error; }
     return response.json();
   }
@@ -49,16 +49,16 @@
   async function activity(scope, mode, onMarket, onEvidence) {
     const request = ++activityRequest, prior = visit(scope), params = new URLSearchParams();
     if (mode === "visit" && prior) {
-      if (scope === "dbmf") { params.set("since_id", prior.after_id); if (prior.report_id) params.set("baseline_id", prior.report_id); }
+      if ((scope === "dbmf" || scope.startsWith("fund:"))) { params.set("since_id", prior.after_id); if (prior.report_id) params.set("baseline_id", prior.report_id); }
       else params.set("after_id", prior.after_id);
     }
     const root = $("changes-content"), caption = $("changes-caption");
     try {
-      const data = await get((scope === "dbmf" ? "/api/dbmf/changes" : "/api/changes") + "?" + params);
+      const data = await get(((scope === "dbmf" || scope.startsWith("fund:")) ? "/api/dbmf/changes" : "/api/changes") + "?" + params);
       if (request !== activityRequest) return;
       const firstVisit = mode === "visit" && !prior;
       const visitLabel = mode === "visit" && prior ? `Since your last visit: ${stamp(prior.at)}. ` : firstVisit ? "First visit in this browser. Showing the previous report comparison. " : "";
-      if (scope === "dbmf") {
+      if ((scope === "dbmf" || scope.startsWith("fund:"))) {
         caption.textContent = visitLabel + (data.current && data.comparison ? `Reporting dates: ${date(data.comparison.source_date)} → ${date(data.current.source_date)}. Exposure changes in percentage points.` : "A second accepted report is needed to calculate exposure changes.");
         const marketItems = data.items.filter(m => m.category !== "Collateral");
         root.innerHTML = marketItems.length ? `<div class="change-grid">${marketItems.slice(0,5).map(m => `<button class="change-item" data-change-market="${esc(m.id)}"><span>${esc(m.name)}</span><strong>${pp(m.change_pp)}</strong><small>${Number(m.before_pct).toFixed(2)}% → ${Number(m.after_pct).toFixed(2)}%${m.kind === "new" ? " · Newly present" : m.kind === "absent" ? " · Now absent" : ""}</small></button>`).join("")}</div>` : `<p class="change-empty">${data.comparison ? "No market exposure changes in this comparison." : "The first report establishes a baseline."}</p>`;
@@ -72,7 +72,7 @@
         const labels = {baseline:"Tracking baseline", added:"Newly disclosed", removed:"No longer disclosed", direction_changed:"Direction changed", strategy_changed:"Strategy updated", correction:"Interpretation corrected"};
         caption.textContent = visitLabel + (data.current ? `Latest source: ${stamp(data.current.source_as_of)}. ${mode !== "visit" && data.previous ? `Since the check on ${stamp(data.previous.fetched_at)}.` : ""}` : "Waiting for the first accepted disclosure.");
         root.innerHTML = data.items.length ? `<div class="change-grid">${data.items.slice(0,5).map(e => `<button class="change-item" data-change-event="${e.id}"><span>${esc(e.name)}</span><strong>${esc(labels[e.kind] || e.kind)}</strong><small>Observed ${stamp(e.observed_at)} · View evidence →</small></button>`).join("")}</div>` : '<p class="change-empty">No new disclosure changes in this period.</p>';
-        if (data.total > 5) root.innerHTML += `<p class="change-footnote">Showing the latest 5 of ${data.total} changes. <a href="/?page=history">Open the full history →</a></p>`;
+        if (data.total > 5) root.innerHTML += `<p class="change-footnote">Showing the latest 5 of ${data.total} changes. <a href="${DeskContext.path}?page=history">Open the full history →</a></p>`;
         root.querySelectorAll("[data-change-event]").forEach(b => b.addEventListener("click", () => onEvidence(data.items.find(e => e.id === Number(b.dataset.changeEvent)))));
         if(data.cursor_reset)caption.textContent="The saved visit belongs to a newer database. Showing changes since the previous accepted check. Latest source: " + stamp(data.current?.source_as_of);
       }
@@ -92,6 +92,7 @@
 
   let latestHealth = null, healthBusy = false, offlineCount = 0, alertProblem = "", alertMemory = {};
   const alertKey = "desk.alerts.v1";
+  const incidentKey = alertKey + "." + (window.DeskContext?.scope || "legacy");
   function alertSupport() { return "Notification" in window && window.isSecureContext; }
   function alertButton() {
     const button = $("browser-alerts"), enabled = read(alertKey, {}).enabled && alertSupport() && Notification.permission === "granted";
@@ -104,7 +105,7 @@
     const run = () => {
       const settings = read(alertKey, {});
       if (!settings.enabled || !alertSupport() || Notification.permission !== "granted") return;
-      const prior = settings.active || alertMemory;
+      const prior = read(incidentKey, {}) || alertMemory;
       const next = DeskState.transitions(prior, issues);
       for (const [resolved, items] of [[false, next.opened], [true, next.resolved]]) {
         if (!items.length) continue;
@@ -121,7 +122,7 @@
         }
       }
       alertMemory = next.active;
-      write(alertKey, {...settings, active:next.active});
+      write(incidentKey, next.active);
     };
     if (navigator.locks) await navigator.locks.request("research-desk-alerts", run);
     else run();
@@ -129,13 +130,13 @@
   function renderHealth(data) {
     const openPrices = [...$("health-content").querySelectorAll('details[open]')].map(d=>d.id);
     const issueCount = data.issues.length;
-    $("health-summary").textContent = issueCount ? `${issueCount} item${issueCount === 1 ? "" : "s"} need attention` : "Both dashboards are up to date";
+    $("health-summary").textContent = issueCount ? `${issueCount} item${issueCount === 1 ? "" : "s"} need attention` : "This source is up to date";
     $("health-summary").classList.toggle("health-warning", Boolean(issueCount));
     $("health-checked").textContent = "Checked " + stamp(data.server_time);
     const content = `<div class="health-grid">${data.desks.map(d => {
       const dates = d.prices.map(p => p.latest_date).filter(Boolean).sort();
       const summary = !dates.length ? "No completed bars" : dates[0] === dates.at(-1) ? date(dates[0]) : `${date(dates[0])} to ${date(dates.at(-1))}`;
-      return `<article><h3><a href="${d.link}">${d.name}</a></h3><dl><div><dt>Source reporting date</dt><dd>${d.id === "dan" ? stamp(d.source_date) : date(d.source_date)}${d.source_stale ? " · Old source" : ""}</dd></div><div><dt>Last successful source check</dt><dd>${stamp(d.last_collected)}${d.collection_stale ? " · Overdue" : ""}</dd></div><div><dt>Next scheduled check</dt><dd>${stamp(d.next_check)}</dd></div><div><dt>Latest completed prices</dt><dd>${summary}</dd></div><div><dt>Collector</dt><dd>${d.running ? "Collecting" : d.worker_healthy ? "Running" : "Heartbeat missing"}</dd></div></dl><details id="health-prices-${d.id}"><summary>Price freshness by market</summary><div class="table-wrap"><table><thead><tr><th>Market</th><th>Latest bar</th><th>Last successful refresh</th><th>Status</th></tr></thead><tbody>${d.prices.map(p => `<tr><th scope="row">${esc(p.name)}</th><td>${date(p.latest_date)}</td><td>${stamp(p.price_checked_at)}</td><td>${p.price_error ? "Refresh failed" : p.stale ? "Waiting for newer prices" : "Current"}</td></tr>`).join("")}</tbody></table></div></details></article>`;
+      return `<article><h3><a href="${d.link}">${esc(d.name)}</a></h3><dl><div><dt>Source reporting date</dt><dd>${d.id === "dan" ? stamp(d.source_date) : date(d.source_date)}${d.source_stale ? " · Old source" : ""}</dd></div><div><dt>Last successful source check</dt><dd>${stamp(d.last_collected)}${d.collection_stale ? " · Overdue" : ""}</dd></div><div><dt>Next scheduled check</dt><dd>${stamp(d.next_check)}</dd></div><div><dt>Latest completed prices</dt><dd>${summary}</dd></div><div><dt>Collector</dt><dd>${d.running ? "Collecting" : d.worker_healthy ? "Running" : "Heartbeat missing"}</dd></div></dl><details id="health-prices-${d.id}"><summary>Price freshness by market</summary><div class="table-wrap"><table><thead><tr><th>Market</th><th>Latest bar</th><th>Last successful refresh</th><th>Status</th></tr></thead><tbody>${d.prices.map(p => `<tr><th scope="row">${esc(p.name)}</th><td>${date(p.latest_date)}</td><td>${stamp(p.price_checked_at)}</td><td>${p.price_error ? "Refresh failed" : p.stale ? "Waiting for newer prices" : "Current"}</td></tr>`).join("")}</tbody></table></div></details></article>`;
     }).join("")}</div><ul class="health-issues">${data.issues.map(i => `<li><strong>${esc(i.title)}</strong><span>${esc(i.detail)}</span></li>`).join("")}</ul><p class="change-footnote">${esc(data.price_rule)} Last backup: ${stamp(data.last_backup)}.</p>`;
     // Avoid replacing focused controls on every heartbeat-only update.
     if($("health-content").dataset.rendered!==content) {

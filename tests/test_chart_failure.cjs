@@ -15,6 +15,7 @@ test('A failed instrument switch cannot display the previous instrument’s pric
   };
   const view = {page:'overview',symbol:'MSFT',range:'6',horizon:'20',shade:'1',changes:'previous'};
   const context = vm.createContext({
+    DeskContext:{scope:"dan",url:u=>u,apply(){},reportId:v=>Number(v)||null,legacyFund:true,api:"/api/dbmf"},
     document: {getElementById:element, querySelector:element, querySelectorAll:() => []},
     window: {OptionsDesk:{load() {}}, addEventListener() {}},
     Desk: {loadView:() => view, saveView() {}},

@@ -20,7 +20,7 @@
     custom:{legs:[one("call",1,100)],net_cost:null},
   };
   async function get(url) {
-    const response = await fetch(url, {cache:"no-store"});
+    const response = await fetch(window.DeskContext ? DeskContext.url(url) : url, {cache:"no-store"});
     if (!response.ok) throw new Error((await response.json()).detail || "Unable to load strategy analysis.");
     return response.json();
   }
@@ -52,7 +52,7 @@
       (a.payoff_available?'<div id="disclosed-payoff"></div><button class="button secondary" id="explore-disclosed">Explore these legs as a scenario ↗</button>':
         '<div class="analysis-note"><strong>Payoff chart needs more detail</strong><br>'+(a.family==="calendar"?"Options with different expirations require market inputs and a valuation model.":"The disclosure does not establish enough option details to draw a numerical payoff.")+'</div>')+
       (a.missing.length?'<h3 class="missing-title" style="margin-top:20px">Details still missing</h3><ul>'+a.missing.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul>':"")+
-      '<details '+(a.payoff_available?"":"open")+'><summary>Components and assumptions</summary>'+table+'<ul>'+a.assumptions.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul><p class="fine-print">Direction describes the disclosed structure. Dan’s wider portfolio and actual position size are unknown.</p></details></div></div>';
+      '<details '+(a.payoff_available?"":"open")+'><summary>Components and assumptions</summary>'+table+'<ul>'+a.assumptions.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul><p class="fine-print">Direction describes the disclosed structure. The contributor’s wider portfolio and actual position size are unknown.</p></details></div></div>';
     if (strategies.length > 1) $("analysis-select").addEventListener("change", e=>renderAnalysis(Number(e.target.value)));
     if (item.payoff) {
       renderPayoff($("disclosed-payoff"),item.payoff,"disclosed");

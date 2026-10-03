@@ -19,6 +19,7 @@ function browser() {
     return elements.get(id);
   };
   const context = vm.createContext({
+    DeskContext:{scope:"dan",url:u=>u,apply(){},reportId:v=>Number(v)||null,legacyFund:true,api:"/api/dbmf"},
     document:{getElementById:element,querySelector:element,querySelectorAll:()=>[]},
     window:{addEventListener(){},OptionsDesk:{load(){}}},
     Desk:{loadView:()=>({page:'overview',symbol:'MSFT',range:'6',horizon:'20',shade:'1',changes:'previous'}),saveView(){},activity:async()=>{},pp:()=> '—'},
@@ -141,4 +142,17 @@ test('DBMF polling retries a failed detail load even when the server report is u
   await b.app.refresh();
   assert.equal(b.app.state.prices?.bars[0].close,101);
   assert.match(b.element('price-label').textContent,/Treasury futures/);
+});
+
+test('A new fund report invalidates cached projections before selecting new markets',async()=>{
+  const b=dbmf(),respond=b.respond;
+  await b.app.refresh(true);
+  assert.ok(b.app.state.reports.has(1));
+  b.app.state.reports.set('older',{markets:[]});
+  b.respond=async url=>{
+    const data=await respond(url);
+    return url.endsWith('/status')?{...data,latest_report_id:2}:data;
+  };
+  await b.app.refresh();
+  assert.equal(b.app.state.reports.has('older'),false);
 });

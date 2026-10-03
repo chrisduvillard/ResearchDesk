@@ -272,6 +272,8 @@ def tick(conn, prices=False):
     generate(conn)
     if prices:
         maintain_prices(conn)
+        from .chart_prices import maintain
+        maintain(conn)
 
 
 def worker():

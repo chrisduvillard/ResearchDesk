@@ -15,13 +15,20 @@
       range: ["6", choice(["6", "12", "24", "all"])], horizon: ["20", choice(["1", "5", "20", "60"])],
       history: ["", optional(word)], score: ["", optional(word)], shade: ["1", choice(["0", "1"])] },
   };
+  const type = scope => scope.startsWith("fund:") ? "dbmf" : scope.startsWith("contributor:") ? "dan" : scope;
+  function schema(scope) {
+    const fields=schemas[type(scope)];
+    if(!scope.startsWith("fund:"))return fields;
+    const opaque=v=>/^[a-zA-Z0-9_.:^~-]{1,200}$/.test(v);
+    return {...fields,market:["",optional(opaque)],report:["",optional(opaque)],revision:["",optional(opaque)],compare_report:["",optional(opaque)]};
+  }
   function normalize(scope, raw = {}) {
     const view = {};
-    for (const [key, [fallback, valid]] of Object.entries(schemas[scope])) {
+    for (const [key, [fallback, valid]] of Object.entries(schema(scope))) {
       const value = String(raw?.[key] ?? fallback);
       view[key] = valid(value) ? value : fallback;
     }
-    if (scope === "dbmf") {
+    if (type(scope) === "dbmf") {
       if (view.compare !== "date") { view.date = ""; view.compare_report = ""; }
       if (view.compare === "date" && !view.date && !view.compare_report) view.compare = "previous";
     }
@@ -29,13 +36,13 @@
   }
   function fromURL(scope, url, saved) {
     const raw = Object.fromEntries(url.searchParams);
-    if (scope === "dan" && ["overview", "history", "scorecard"].includes(url.hash.slice(1))) raw.page = url.hash.slice(1);
-    return normalize(scope, Object.keys(raw).some(k => k in schemas[scope]) ? raw : saved);
+    if (type(scope) === "dan" && ["overview", "history", "scorecard"].includes(url.hash.slice(1))) raw.page = url.hash.slice(1);
+    return normalize(scope, Object.keys(raw).some(k => k in schema(scope)) ? raw : saved);
   }
   function viewURL(scope, raw) {
     const params = new URLSearchParams();
     for (const [key, value] of Object.entries(normalize(scope, raw))) if (value !== "") params.set(key, value);
-    return (scope === "dbmf" ? "/dbmf" : "/dan") + "?" + params;
+    return (scope.startsWith("fund:") ? "/funds/"+encodeURIComponent(scope.slice(5)) : scope.startsWith("contributor:") ? "/contributors/"+encodeURIComponent(scope.slice(12)) : type(scope) === "dbmf" ? "/dbmf" : "/dan") + "?" + params;
   }
   function transitions(previous, issues) {
     const active = Object.fromEntries(issues.filter(i => i.notify || previous[i.key]).map(i => [i.key, {title: i.title, link: i.link}]));

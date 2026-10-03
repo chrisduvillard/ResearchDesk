@@ -506,3 +506,23 @@ Tests run against temporary databases and archived fixtures. They cover parsing 
 For UI changes, also check desktop and a narrow mobile viewport: navigation, keyboard controls, date fallback, market jumps, Back/Forward, revision evidence, notification settings and horizontal table scrolling. Use an isolated data directory for simulated source failures or corrections.
 
 GitHub Actions runs the JavaScript tests, validates Compose, builds the Docker image, runs Python tests inside it with networking disabled, and checks a fresh web service and bundled assets. See [the workflow](../.github/workflows/ci.yml).
+
+### Shared dashboard projections
+
+`/contributors/{id}` and `/funds/{id}` serve the original Disclosure Desk and
+Exposure Desk templates with an entity context. `/dan` and `/dbmf` remain valid,
+as do the former `/research?view=contributors&id=…` and fund query links.
+
+Read-only `/api/v2/contributors/{id}/desk/…` projections provide status,
+positions, instruments, events, timeline, strategy analysis, cached scorecards,
+changes, health, chart prices and exports. Fund desk projections provide status,
+exposures/comparisons, history, reports, revisions, health, chart prices and CSV.
+Legacy unversioned APIs keep their contracts. DBMF's shared page continues to
+read its richer legacy report projections, with source-worker-aware status.
+
+Chart-only OHLC batches use `price_batches.kind=chart`. They cannot enter saved
+scorecard or simulation inputs. The analytics worker refreshes one chart asset
+per tick, with a twelve-hour attempt interval and retained prior batches on
+failure. Issuer equity symbols require a matching company name and verified US
+provider listing; futures references are explicitly mapped and labeled. Dates
+without observations are not interpolated. Database schema remains version 6.

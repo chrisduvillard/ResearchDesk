@@ -10,9 +10,10 @@
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23274035'/%3E%3Ctext x='32' y='43' fill='white' font-size='32' text-anchor='middle' font-family='serif'%3EDn%3C/text%3E%3C/svg%3E"
     />
     <link rel="stylesheet" href="/static/style.css?v=1.5.1" />
-    <script src="/static/desk-state.js?v=1.5.1" defer></script><script src="/static/desk.js?v=1.5.1" defer></script><script src="/static/vendor/lightweight-charts.js" defer></script>
+    <script src="/static/desk-context.js" defer></script><script src="/static/desk-state.js?v=1.5.1" defer></script><script src="/static/desk.js?v=1.5.1" defer></script><script src="/static/vendor/lightweight-charts.js" defer></script>
     <script src="/static/options.js?v=1.5.1" defer></script>
     <script src="/static/app.js?v=1.5.1" defer></script>
+    <script src="/static/contributor-owner.js" defer></script>
     <link rel="stylesheet" href="/static/navigation.css" />
     <script src="/static/navigation.js" defer></script>
   </head>
@@ -38,7 +39,7 @@
       <div id="error-banner" class="alert hidden" role="alert"></div>
 
     <details id="data-health" class="panel data-health" tabindex="-1">
-      <summary><span><strong>Data health</strong><span id="health-summary">Checking both dashboards…</span></span><span id="health-checked"></span></summary>
+      <summary><span><strong>Data health</strong><span id="health-summary">Checking this source…</span></span><span id="health-checked"></span></summary>
       <div id="health-content"><p class="change-empty">Loading source dates and collection status…</p></div>
       <div class="alert-settings"><button id="browser-alerts" class="button secondary" aria-pressed="false">Enable browser alerts</button><p id="alert-note"></p></div>
     </details>
@@ -282,7 +283,7 @@
             ><button data-horizon="20" class="active">20 sessions</button
             ><button data-horizon="60">60 sessions</button>
           </div>
-          <span id="sample-note" class="muted"></span>
+          <label>Asset class<select id="score-class"><option>Awaiting observations</option></select></label><label>Returns<select id="score-cost"><option value="gross">Gross</option><option value="net">Modeled net</option></select></label><span id="sample-note" class="muted"></span>
         </div>
         <div class="score-grid" id="score-cards"></div>
         <div id="score-empty" class="panel score-empty hidden">
@@ -367,7 +368,7 @@
             Download the script, paste it into TradingView’s Pine Editor, and
             choose Add to chart. Use a 1-day chart.
           </p>
-          <a class="button secondary" href="/downloads/dan-nathan.pine"
+          <a class="button secondary" href="/downloads/research-desk.pine"
             >Download indicator ↓</a
           >
           <button id="copy-script" class="button secondary">Copy script</button>
@@ -405,7 +406,7 @@
         <button class="icon-button" id="close-payoff" aria-label="Close payoff explorer">×</button>
       </div>
       <p id="payoff-company" class="muted"></p>
-      <p class="scenario-notice">These are example or user-entered legs. Calculating a scenario does not record a position for Dan.</p>
+      <p class="scenario-notice">These are example or user-entered legs. Calculating a scenario does not record a contributor position.</p>
       <form id="payoff-form">
         <div class="payoff-controls">
           <label>Start with an example<select id="payoff-example">
