@@ -363,7 +363,6 @@ async function funds(params, signal) {
     `<form class="filters" id="fund-filters"><label>Measure<select name="measure">${options(
       [
         ["notional_pct_nav", "Signed notional / NAV"],
-        ["equity_weight_pct", "Equity portfolio weight"],
         ["collateral_pct_nav", "Collateral / NAV"],
         ["issuer_risk_weight_pct", "Issuer risk weight"],
         ["volatility_contribution_pct", "Volatility contribution"],

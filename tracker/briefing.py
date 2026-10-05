@@ -5,6 +5,7 @@ import json
 from datetime import datetime, timedelta, time, timezone
 from zoneinfo import ZoneInfo
 from . import db
+from .fund_scope import ACTIVITY_SCOPE_SQL, SOURCE_SCOPE_SQL
 
 
 def cutoff(now, hour=7):
@@ -31,7 +32,7 @@ def generate(conn, now=None):
         ).fetchone()
         previous = last[0] if last else db.iso(cutoff(end - timedelta(seconds=1)))
         rows = conn.execute(
-            "SELECT id FROM activity WHERE recorded_at>? AND recorded_at<=? ORDER BY id",
+            "SELECT id FROM activity WHERE " + ACTIVITY_SCOPE_SQL + " AND recorded_at>? AND recorded_at<=? ORDER BY id",
             (previous, db.iso(end)),
         ).fetchall()
         conn.execute(
@@ -84,7 +85,7 @@ def activity_page(
 
     asset_ids = json.dumps(related_ids(conn, asset_id)) if asset_id else "[]"
     rows = conn.execute(
-        """SELECT * FROM activity WHERE id>? AND (? IS NULL OR source_id=?) AND (? IS NULL OR asset_id IN (SELECT value FROM json_each(?)))
+        f"""SELECT * FROM activity WHERE {ACTIVITY_SCOPE_SQL} AND id>? AND (? IS NULL OR source_id=?) AND (? IS NULL OR asset_id IN (SELECT value FROM json_each(?)))
       ORDER BY id LIMIT ?""",
         (after, source_id, source_id, asset_id, asset_ids, limit + 1),
     ).fetchall()
@@ -131,8 +132,10 @@ def alerts(conn, items):
     result = []
     for item in items:
         source = conn.execute(
-            "SELECT coverage FROM sources WHERE id=?", (item["source_id"],)
+            "SELECT coverage FROM sources WHERE " + SOURCE_SCOPE_SQL + " AND id=?", (item["source_id"],)
         ).fetchone()
+        if not source:
+            continue
         if item["kind"] == "exposure_change" and (
             not source or source[0] != "qualified"
         ):

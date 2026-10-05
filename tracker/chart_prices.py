@@ -2,6 +2,7 @@
 
 import json
 from . import db
+from .fund_scope import FUND_IDS_SQL
 from .research import canonical_id
 
 
@@ -296,7 +297,7 @@ def maintain(conn):
     from datetime import datetime, timedelta
 
     candidates = conn.execute(
-        """SELECT a.* FROM assets a WHERE a.id IN (SELECT asset_id FROM research_events UNION SELECT h.asset_id FROM fund_holdings h JOIN fund_reports r ON r.id=h.report_id WHERE r.status='accepted' AND h.collateral=0) ORDER BY a.id"""
+        f"""SELECT a.* FROM assets a WHERE a.id IN (SELECT asset_id FROM research_events UNION SELECT h.asset_id FROM fund_holdings h JOIN fund_reports r ON r.id=h.report_id WHERE r.status='accepted' AND r.fund_id IN ({FUND_IDS_SQL}) AND h.collateral=0) ORDER BY a.id"""
     ).fetchall()
 
     def last(a):

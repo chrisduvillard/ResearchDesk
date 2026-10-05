@@ -8,6 +8,7 @@ import time
 from datetime import datetime, timedelta
 import yfinance as yf
 from . import db
+from .fund_scope import SOURCE_SCOPE_SQL
 from .calendar import completed
 from .analytics import enqueue, freeze_inputs, process_job, valid_bar
 from .briefing import generate
@@ -222,7 +223,7 @@ def tick(conn, prices=False):
                             run["id"],
                         )
             db.set_setting(conn, "outcomes:" + run["id"], run["id"])
-    for source in conn.execute("SELECT * FROM sources WHERE enabled=1").fetchall():
+    for source in conn.execute("SELECT * FROM sources WHERE enabled=1 AND " + SOURCE_SCOPE_SQL).fetchall():
         last = conn.execute(
             "SELECT finished_at FROM source_runs WHERE source_id=? AND status='success' ORDER BY id DESC LIMIT 1",
             (source["id"],),

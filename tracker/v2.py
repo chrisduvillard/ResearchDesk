@@ -194,6 +194,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 from .auth import audit
 from . import funds as fund_store
+from .fund_scope import TRACKED_FUNDS, FUND_IDS_SQL, SOURCE_SCOPE_SQL, ACTIVITY_SCOPE_SQL
 from .briefing import activity_page, alerts
 from .analytics import enqueue, freeze_inputs
 
@@ -203,7 +204,7 @@ def funds():
     with db.database() as conn:
         result = []
         for r in conn.execute(
-            "SELECT f.*,s.coverage,s.reason,s.url,s.id AS source_id FROM funds f JOIN sources s ON s.fund_id=f.id ORDER BY f.id"
+            f"SELECT f.*,s.coverage,s.reason,s.url,s.id AS source_id FROM funds f JOIN sources s ON s.fund_id=f.id WHERE f.id IN ({FUND_IDS_SQL}) ORDER BY f.id"
         ):
             latest = conn.execute(
                 "SELECT id,source_date,acquired_at FROM fund_reports WHERE fund_id=? AND status='accepted' ORDER BY source_date DESC,revision DESC LIMIT 1",
@@ -296,7 +297,7 @@ def fund_comparisons(
         try:
             return fund_store.comparison(
                 conn,
-                list(dict.fromkeys(funds.split(",")))[:10],
+                [f for f in dict.fromkeys(funds.split(",")) if f in TRACKED_FUNDS],
                 measure,
                 mode == "aligned",
             )
@@ -308,7 +309,7 @@ def fund_comparisons(
 def sources_status():
     with db.database() as conn:
         result = []
-        for row in conn.execute("SELECT * FROM sources ORDER BY id"):
+        for row in conn.execute("SELECT * FROM sources WHERE " + SOURCE_SCOPE_SQL + " ORDER BY id"):
             last = conn.execute(
                 "SELECT * FROM source_runs WHERE source_id=? ORDER BY id DESC LIMIT 1",
                 (row["id"],),
@@ -342,6 +343,8 @@ def configure_source(
         row = conn.execute("SELECT * FROM sources WHERE id=?", (source_id,)).fetchone()
         if not row:
             raise HTTPException(404, "Source not found")
+        if payload.enabled and row["fund_id"] and row["fund_id"] not in TRACKED_FUNDS:
+            raise HTTPException(422, "Fund is outside active coverage")
         if payload.enabled and not row["adapter"]:
             raise HTTPException(422, "Source automation is unavailable")
         conn.execute(
@@ -404,8 +407,8 @@ def asset(asset_id: str):
         result["holdings"] = [
             dict(r)
             for r in conn.execute(
-                """SELECT h.*,f.fund_id,f.source_date FROM fund_holdings h JOIN fund_reports f ON f.id=h.report_id
-          WHERE h.asset_id IN (SELECT value FROM json_each(?)) AND f.id=(SELECT r.id FROM fund_reports r WHERE r.fund_id=f.fund_id AND r.status='accepted' ORDER BY source_date DESC,revision DESC LIMIT 1)""",
+                f"""SELECT h.*,f.fund_id,f.source_date FROM fund_holdings h JOIN fund_reports f ON f.id=h.report_id
+          WHERE f.fund_id IN ({FUND_IDS_SQL}) AND h.asset_id IN (SELECT value FROM json_each(?)) AND f.id=(SELECT r.id FROM fund_reports r WHERE r.fund_id=f.fund_id AND r.status='accepted' ORDER BY source_date DESC,revision DESC LIMIT 1)""",
                 (json.dumps(linked),),
             )
         ]
@@ -484,7 +487,7 @@ def asset_timeline(asset_id: str, response: Response, cursor: str | None = None)
             conn,
             response,
             "activity",
-            "asset_id IN (SELECT value FROM json_each(?))",
+            ACTIVITY_SCOPE_SQL + " AND asset_id IN (SELECT value FROM json_each(?))",
             (json.dumps(related_ids(conn, asset_id)),),
             "asset:" + asset_id,
             cursor,
@@ -685,14 +688,14 @@ def briefings():
         items = [
             dict(r)
             for r in conn.execute(
-                "SELECT * FROM activity WHERE id IN (SELECT value FROM json_each(?)) ORDER BY id DESC",
+                "SELECT * FROM activity WHERE " + ACTIVITY_SCOPE_SQL + " AND id IN (SELECT value FROM json_each(?)) ORDER BY id DESC",
                 (json.dumps(ids),),
             )
         ]
         live = [
             dict(r)
             for r in conn.execute(
-                "SELECT * FROM activity WHERE recorded_at>? ORDER BY id DESC LIMIT 200",
+                "SELECT * FROM activity WHERE " + ACTIVITY_SCOPE_SQL + " AND recorded_at>? ORDER BY id DESC LIMIT 200",
                 (row["cutoff"],),
             )
         ]

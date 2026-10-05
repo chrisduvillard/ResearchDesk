@@ -10,6 +10,7 @@ from urllib.parse import urljoin, urlsplit, urlencode
 from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup
 from . import db
+from .fund_scope import TRACKED_FUNDS, SOURCE_SCOPE_SQL
 from .calendar import schedule as contributor_schedule
 from .dbmf.collector import schedule as fund_schedule
 from .research import ingest_disclosure, sync_legacy, archive_bytes, activity
@@ -56,7 +57,7 @@ def prepare_sources(conn):
             "UPDATE sources SET adapter='cta',enabled=1,coverage='observation',reason='Awaiting five scheduled successes across two dates' WHERE fund_id='CTA' AND adapter IS NULL"
         )
         conn.execute(
-            "UPDATE sources SET adapter='ark',enabled=1,coverage='observation',reason='Awaiting five scheduled successes across two dates',url='https://www.ark-funds.com/funds/'||lower(fund_id) WHERE fund_id LIKE 'ARK%' AND adapter IS NULL"
+            "UPDATE sources SET enabled=0 WHERE NOT " + SOURCE_SCOPE_SQL
         )
         conn.execute(
             "UPDATE sources SET reason='Official endpoint returned HTTP 403; automatic holdings unavailable' WHERE fund_id='WTMF' AND adapter IS NULL"
@@ -192,6 +193,8 @@ def collect_source(source_id, *, scheduled=False, now=None, download=download):
             source = conn.execute(
                 "SELECT * FROM sources WHERE id=?", (source_id,)
             ).fetchone()
+            if source and source["fund_id"] and source["fund_id"] not in TRACKED_FUNDS:
+                return {"status": "disabled", "error": "Fund is outside active coverage"}
             if not source or not source["adapter"]:
                 return {
                     "status": "unavailable",
@@ -330,7 +333,7 @@ def worker(kind):
                 rows = conn.execute(
                     "SELECT * FROM sources WHERE enabled=1 AND "
                     + ("fund_id" if kind == "fund" else "contributor_id")
-                    + " IS NOT NULL"
+                    + " IS NOT NULL AND " + SOURCE_SCOPE_SQL
                 ).fetchall()
             for source in rows:
                 with db.database() as conn:

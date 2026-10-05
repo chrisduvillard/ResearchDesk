@@ -47,7 +47,7 @@
       const response = await fetch("/api/v2/" + path, { signal: AbortSignal.timeout(15000) });
       if (!response.ok) throw Error("Could not load choices");
       const order = path === "funds"
-        ? ["DBMF", "KMLM", "CTA", "WTMF", "ARKK", "ARKQ", "ARKW", "ARKG", "ARKF", "ARKX"]
+        ? ["DBMF", "KMLM", "CTA", "WTMF"]
         : ["dan-nathan", "karen-finerman", "guy-adami", "josh-brown", "steve-weiss", "tim-seymour"];
       const rank = id => order.includes(id) ? order.indexOf(id) : order.length;
       const rows = (await response.json()).filter(hasData).sort((a, b) => rank(a.id) - rank(b.id));
